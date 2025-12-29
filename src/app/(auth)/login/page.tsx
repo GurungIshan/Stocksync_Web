@@ -10,17 +10,17 @@ import { Package } from 'lucide-react';
 
 export default function LoginPage() {
   return (
-    <Card className="w-full max-w-sm">
-      <CardHeader className="text-center">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground">
-          <Package className="h-8 w-8" />
+    <div className="mx-auto grid w-[350px] gap-6">
+        <div className="grid gap-2 text-center">
+            <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                <Package className="h-8 w-8" />
+            </div>
+            <h1 className="text-3xl font-bold font-headline">StockSync</h1>
+            <p className="text-balance text-muted-foreground">
+                Welcome! Please sign in to continue.
+            </p>
         </div>
-        <CardTitle className="text-3xl font-headline">StockSync</CardTitle>
-        <CardDescription>Welcome! Please sign in to continue.</CardDescription>
-      </CardHeader>
-      <CardContent>
         <LoginForm />
-      </CardContent>
-    </Card>
+    </div>
   );
 }
