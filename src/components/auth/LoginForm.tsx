@@ -37,25 +37,41 @@ export function LoginForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      if (values.email === 'admin@stockwise.com' && values.password === 'password') {
+    try {
+      const response = await fetch('https://localhost:7232/api/Auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: values.email, password: values.password }),
+      });
+
+      if (response.ok) {
         toast({
           title: 'Login Successful',
-          description: 'Welcome back, Admin!',
+          description: 'Welcome back!',
         });
         router.push('/dashboard');
       } else {
+        const errorData = await response.json().catch(() => ({ message: 'Invalid email or password. Please try again.' }));
         toast({
           variant: 'destructive',
           title: 'Login Failed',
-          description: 'Invalid email or password. Please try again.',
+          description: errorData.message || 'An unknown error occurred.',
         });
         setIsLoading(false);
       }
-    }, 1000);
+    } catch (error) {
+      console.error('Login error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Login Failed',
+        description: 'Could not connect to the server. Please try again later.',
+      });
+      setIsLoading(false);
+    }
   }
 
   return (
