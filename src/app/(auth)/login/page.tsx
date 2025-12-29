@@ -24,7 +24,7 @@ export default function LoginPage() {
         <Card>
           <CardHeader>
             <CardTitle>Login</CardTitle>
-            <CardDescription>Enter your credentials to access your account.</CardDescription>
+            {/* <CardDescription>Enter your credentials to access your account.</CardDescription> */}
           </CardHeader>
           <CardContent>
             <LoginForm />
