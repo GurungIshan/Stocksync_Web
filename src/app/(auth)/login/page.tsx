@@ -15,8 +15,8 @@ export default function LoginPage() {
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground">
           <Package className="h-8 w-8" />
         </div>
-        <CardTitle className="text-3xl font-headline">StockWise</CardTitle>
-        <CardDescription>Welcome back! Please sign in to continue.</CardDescription>
+        <CardTitle className="text-3xl font-headline">StockSync</CardTitle>
+        <CardDescription>Welcome! Please sign in to continue.</CardDescription>
       </CardHeader>
       <CardContent>
         <LoginForm />
