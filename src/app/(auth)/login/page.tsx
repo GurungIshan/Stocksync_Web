@@ -10,8 +10,9 @@ import { Package } from 'lucide-react';
 
 export default function LoginPage() {
   return (
-    <div className="mx-auto grid w-[350px] gap-6">
-        <div className="grid gap-2 text-center">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
+       <div className="mx-auto w-full max-w-[350px] space-y-6">
+        <div className="space-y-2 text-center">
             <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground">
                 <Package className="h-8 w-8" />
             </div>
@@ -20,7 +21,16 @@ export default function LoginPage() {
                 Welcome! Please sign in to continue.
             </p>
         </div>
-        <LoginForm />
+        <Card>
+          <CardHeader>
+            <CardTitle>Login</CardTitle>
+            <CardDescription>Enter your credentials to access your account.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <LoginForm />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
