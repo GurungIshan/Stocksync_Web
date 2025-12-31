@@ -54,7 +54,7 @@ export default function DashboardStats() {
   }, []);
 
   const formatCurrency = (value: number) =>
-    new Intl.NumberFormat('en-IN').format(value);
+    `Nrs ${new Intl.NumberFormat('en-IN').format(value)}`;
 
   const totalProducts = products.length;
   const inventoryValue = products.reduce((sum, p) => sum + p.pricePerUnit * p.stockQuantity, 0);
