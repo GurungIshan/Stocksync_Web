@@ -38,8 +38,10 @@ export default function AppSidebar() {
                   isActive={pathname.startsWith(link.href)}
                   tooltip={link.label}
                 >
-                  <link.icon />
-                  <span>{link.label}</span>
+                  <a>
+                    <link.icon />
+                    <span>{link.label}</span>
+                  </a>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
@@ -51,8 +53,10 @@ export default function AppSidebar() {
             <SidebarMenuItem>
                 <Link href={settingsLink.href} passHref>
                     <SidebarMenuButton asChild isActive={pathname.startsWith(settingsLink.href)} tooltip={settingsLink.label}>
-                        <settingsLink.icon />
-                        <span>{settingsLink.label}</span>
+                        <a>
+                            <settingsLink.icon />
+                            <span>{settingsLink.label}</span>
+                        </a>
                     </SidebarMenuButton>
                 </Link>
             </SidebarMenuItem>
