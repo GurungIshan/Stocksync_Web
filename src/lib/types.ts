@@ -6,7 +6,7 @@ export type Product = {
   sku: string;
   pricePerUnit: number;
   stockQuantity: number;
-  reoredLevel: number; // Assuming this is 'reorderLevel' from your API
+  reoredLevel: number; 
   categoryId: number;
 };
 
