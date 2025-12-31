@@ -230,7 +230,7 @@ export default function SalesForm() {
                            <Input 
                             type="number" 
                             placeholder="1" {...field} 
-                            max={selectedProduct?.stockQuantity}
+                            max={selectedProduct ? selectedProduct.stockQuantity : undefined}
                             min={1}
                            />
                         </FormControl>
