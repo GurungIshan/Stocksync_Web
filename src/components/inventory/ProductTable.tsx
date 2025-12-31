@@ -1,4 +1,3 @@
-
 'use client';
 import { useEffect, useState } from "react";
 import type { Product } from "@/lib/types";
@@ -23,8 +22,11 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
+type ProductTableProps = {
+    selectedCategory: string | null;
+}
 
-export default function ProductTable() {
+export default function ProductTable({ selectedCategory }: ProductTableProps) {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -38,8 +40,13 @@ export default function ProductTable() {
                 return;
             }
 
+            let url = 'https://localhost:7232/api/Product';
+            if (selectedCategory) {
+                url += `?categoryId=${selectedCategory}`;
+            }
+
             try {
-                const response = await fetch('https://localhost:7232/api/Product', {
+                const response = await fetch(url, {
                     method: 'GET',
                     headers: {
                         'accept': '*/*',
@@ -55,12 +62,13 @@ export default function ProductTable() {
                 setProducts(data);
             } catch (error) {
                 console.error('Failed to fetch products:', error);
+                setProducts([]); // Clear products on error
             } finally {
                 setLoading(false);
             }
         }
         fetchProducts();
-    }, []);
+    }, [selectedCategory]);
 
     const formatCurrency = (value: number) =>
         new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'NPR', minimumFractionDigits: 0 }).format(value);
@@ -91,35 +99,43 @@ export default function ProductTable() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {products.map((product) => (
-                                <TableRow key={product.id}>
-                                    <TableCell className="font-medium">{product.productName}</TableCell>
-                                    <TableCell>{product.category?.name}</TableCell>
-                                    <TableCell>{product.sku}</TableCell>
-                                    <TableCell>{formatCurrency(product.pricePerUnit)}</TableCell>
-                                    <TableCell>{product.stockQuantity}</TableCell>
-                                    <TableCell>
-                                        <Badge variant={product.stockQuantity > product.reoredLevel ? 'secondary' : 'destructive'}>
-                                            {product.stockQuantity > product.reoredLevel ? 'In Stock' : 'Low Stock'}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                            <Button aria-haspopup="true" size="icon" variant="ghost">
-                                                <MoreHorizontal className="h-4 w-4" />
-                                                <span className="sr-only">Toggle menu</span>
-                                            </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                            <DropdownMenuItem>Edit</DropdownMenuItem>
-                                            <DropdownMenuItem>Delete</DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
+                            {products.length > 0 ? (
+                                products.map((product) => (
+                                    <TableRow key={product.id}>
+                                        <TableCell className="font-medium">{product.productName}</TableCell>
+                                        <TableCell>{product.category?.name}</TableCell>
+                                        <TableCell>{product.sku}</TableCell>
+                                        <TableCell>{formatCurrency(product.pricePerUnit)}</TableCell>
+                                        <TableCell>{product.stockQuantity}</TableCell>
+                                        <TableCell>
+                                            <Badge variant={product.stockQuantity > product.reoredLevel ? 'secondary' : 'destructive'}>
+                                                {product.stockQuantity > product.reoredLevel ? 'In Stock' : 'Low Stock'}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                <Button aria-haspopup="true" size="icon" variant="ghost">
+                                                    <MoreHorizontal className="h-4 w-4" />
+                                                    <span className="sr-only">Toggle menu</span>
+                                                </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                <DropdownMenuItem>Edit</DropdownMenuItem>
+                                                <DropdownMenuItem>Delete</DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={7} className="h-24 text-center">
+                                        No products found.
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            )}
                         </TableBody>
                     </Table>
                 )}

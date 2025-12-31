@@ -1,5 +1,5 @@
 
-import { products as mockProducts, categories, sales, alerts } from '@/lib/data';
+import { products as mockProducts, sales, alerts } from '@/lib/data';
 import type { Product, Category, Sale, Alert } from './types';
 import { getToken } from './auth';
 
@@ -41,8 +41,29 @@ export async function getProductById(id: string): Promise<any | undefined> {
 }
 
 export async function getCategories(): Promise<Category[]> {
-  await delay(300);
-  return categories;
+  const token = getToken();
+  if (!token) {
+    console.log("No auth token found, skipping category fetch.");
+    return [];
+  }
+  try {
+     const response = await fetch('https://localhost:7232/api/Category', {
+        method: 'GET',
+        headers: {
+            'accept': '*/*',
+            'Authorization': `Bearer ${token}`
+        },
+        cache: 'no-store'
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch(e) {
+    console.error('Failed to fetch categories:', e);
+    return [];
+  }
 }
 
 export async function getSales(): Promise<Sale[]> {
