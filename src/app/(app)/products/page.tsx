@@ -1,8 +1,5 @@
 
-
-import { Button } from "@/components/ui/button";
 import { getCategories } from "@/lib/api";
-import { PlusCircle } from "lucide-react";
 import ProductTable from "@/components/inventory/ProductTable";
 import ProductFilters from "@/components/inventory/ProductFilters";
 
@@ -13,9 +10,6 @@ export default async function ProductsPage() {
         <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between">
                 <h1 className="text-3xl font-bold font-headline">Products</h1>
-                <Button>
-                    <PlusCircle className="mr-2 h-4 w-4" /> Add Product
-                </Button>
             </div>
             <ProductFilters categories={categories} />
             <ProductTable />
