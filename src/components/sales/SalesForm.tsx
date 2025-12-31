@@ -35,6 +35,7 @@ const salesFormSchema = z.object({
       z.object({
         productId: z.coerce.number().min(1, 'Product is required.'),
         quantity: z.coerce.number().min(1, 'Quantity must be at least 1.'),
+        pricePerUnit: z.coerce.number().optional(), // Now optional in schema
       })
     )
     .min(1, 'At least one item is required.'),
@@ -125,6 +126,15 @@ export default function SalesForm() {
         return;
     }
 
+    const itemsPayload = data.items.map(item => {
+        const product = products.find(p => p.id === item.productId);
+        return {
+            productId: item.productId,
+            quantity: item.quantity,
+            pricePerUnit: product ? product.pricePerUnit : 0,
+        };
+    });
+
     try {
         const response = await fetch('https://localhost:7232/api/Sale', {
             method: 'POST',
@@ -134,9 +144,7 @@ export default function SalesForm() {
             },
             body: JSON.stringify({
                 paymentMethod: data.paymentMethod,
-                items: data.items,
-                discount: 0, // Not implemented
-                tax: 0, // Not implemented
+                items: itemsPayload,
             })
         });
 
