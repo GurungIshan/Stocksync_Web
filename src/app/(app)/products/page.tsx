@@ -1,8 +1,9 @@
-import ProductFilters from "@/components/inventory/ProductFilters";
-import ProductGrid from "@/components/inventory/ProductGrid";
+
 import { Button } from "@/components/ui/button";
 import { getCategories, getProducts } from "@/lib/api";
 import { PlusCircle } from "lucide-react";
+import ProductTable from "@/components/inventory/ProductTable";
+import ProductFilters from "@/components/inventory/ProductFilters";
 
 export default async function ProductsPage() {
     const products = await getProducts();
@@ -17,7 +18,7 @@ export default async function ProductsPage() {
                 </Button>
             </div>
             <ProductFilters categories={categories} />
-            <ProductGrid products={products} />
+            <ProductTable products={products} />
         </div>
     );
 }

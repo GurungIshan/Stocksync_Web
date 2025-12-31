@@ -1,17 +1,28 @@
-import { products, categories, sales, alerts } from '@/lib/data';
+import { products as mockProducts, categories, sales, alerts } from '@/lib/data';
 import type { Product, Category, Sale, Alert } from './types';
 
 // Simulate API delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export async function getProducts(): Promise<Product[]> {
-  await delay(500);
-  return products;
+  try {
+    // The base URL is handled by the rewrite in next.config.ts
+    const response = await fetch('/api/Product', { cache: 'no-store' });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Failed to fetch products:', error);
+    return []; // Return empty array on error
+  }
 }
 
-export async function getProductById(id: string): Promise<Product | undefined> {
+export async function getProductById(id: string): Promise<any | undefined> {
   await delay(200);
-  return products.find(p => p.id === id);
+  // This needs to be adapted to your API or mocked data structure
+  return mockProducts.find(p => p.id === id);
 }
 
 export async function getCategories(): Promise<Category[]> {
@@ -38,11 +49,11 @@ export async function getReorderAlerts(): Promise<Alert[]> {
 
 export async function getDashboardStats() {
     await delay(800);
-    const totalProducts = products.length;
+    const totalProducts = mockProducts.length;
     const lowStockItems = alerts.length;
     const todaySales = await getTodaysSales();
     const todaysRevenue = todaySales.reduce((sum, sale) => sum + sale.total, 0);
-    const inventoryValue = products.reduce((sum, p) => sum + p.price * p.stock, 0);
+    const inventoryValue = mockProducts.reduce((sum, p) => sum + p.price * p.stock, 0);
 
     return {
         totalProducts,

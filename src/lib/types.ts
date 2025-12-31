@@ -1,13 +1,13 @@
+
 export type Product = {
-  id: string;
-  name: string;
+  id: number;
+  productName: string;
+  description: string;
   sku: string;
-  price: number;
-  stock: number;
-  reorderPoint: number;
-  category: string;
-  imageUrl: string;
-  imageHint: string;
+  pricePerUnit: number;
+  stockQuantity: number;
+  reoredLevel: number; // Assuming this is 'reorderLevel' from your API
+  categoryId: number;
 };
 
 export type Category = {
@@ -40,6 +40,16 @@ export type Alert = {
 };
 
 export type CartItem = {
-  product: Product;
+  product: {
+    id: string;
+    name: string;
+    sku: string;
+    price: number;
+    stock: number;
+    reorderPoint: number;
+    category: string;
+    imageUrl: string;
+    imageHint: string;
+  };
   quantity: number;
 };
