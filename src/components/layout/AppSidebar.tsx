@@ -32,8 +32,9 @@ export default function AppSidebar() {
         <SidebarMenu>
           {navLinks.map((link) => (
             <SidebarMenuItem key={link.href}>
-              <Link href={link.href}>
+              <Link href={link.href} passHref legacyBehavior>
                 <SidebarMenuButton
+                  as="a"
                   isActive={pathname.startsWith(link.href)}
                   tooltip={link.label}
                 >
@@ -48,8 +49,8 @@ export default function AppSidebar() {
       <SidebarFooter>
         <SidebarMenu>
             <SidebarMenuItem>
-                <Link href={settingsLink.href}>
-                    <SidebarMenuButton isActive={pathname.startsWith(settingsLink.href)} tooltip={settingsLink.label}>
+                <Link href={settingsLink.href} passHref legacyBehavior>
+                    <SidebarMenuButton as="a" isActive={pathname.startsWith(settingsLink.href)} tooltip={settingsLink.label}>
                         <settingsLink.icon />
                         <span>{settingsLink.label}</span>
                     </SidebarMenuButton>
