@@ -56,6 +56,7 @@ export default function ProductTable() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Product Name</TableHead>
+                                <TableHead>Category</TableHead>
                                 <TableHead>SKU</TableHead>
                                 <TableHead>Price</TableHead>
                                 <TableHead>Stock</TableHead>
@@ -69,6 +70,7 @@ export default function ProductTable() {
                             {products.map((product) => (
                                 <TableRow key={product.id}>
                                     <TableCell className="font-medium">{product.productName}</TableCell>
+                                    <TableCell>{product.category?.name}</TableCell>
                                     <TableCell>{product.sku}</TableCell>
                                     <TableCell>{formatCurrency(product.pricePerUnit)}</TableCell>
                                     <TableCell>{product.stockQuantity}</TableCell>

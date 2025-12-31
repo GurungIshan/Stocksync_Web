@@ -1,4 +1,12 @@
 
+export type Category = {
+  id: number;
+  name: string;
+  description: string;
+  createdAt: string;
+  isActive: boolean;
+};
+
 export type Product = {
   id: number;
   productName: string;
@@ -6,14 +14,13 @@ export type Product = {
   sku: string;
   pricePerUnit: number;
   stockQuantity: number;
-  reoredLevel: number; 
+  reoredLevel: number;
   categoryId: number;
-};
-
-export type Category = {
-  id: string;
-  name: string;
-  subcategories?: Category[];
+  supplierId: number;
+  isActive: boolean;
+  createdAt: string;
+  category: Category;
+  suppliersInfromation: any; // Can be defined more strictly if needed
 };
 
 export type Sale = {
