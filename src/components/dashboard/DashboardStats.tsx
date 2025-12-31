@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { IndianRupee, Package, AlertCircle, ShoppingCart, Loader2 } from 'lucide-react';
+import { Package, AlertCircle, ShoppingCart, Loader2 } from 'lucide-react';
 import { getToken } from '@/lib/auth';
 import type { Product } from '@/lib/types';
 import { getDashboardStats } from '@/lib/api';
@@ -63,7 +63,7 @@ export default function DashboardStats() {
     {
       title: "Today's Revenue",
       value: formatCurrency(stats.todaysRevenue),
-      icon: <IndianRupee className="h-5 w-5 text-muted-foreground" />,
+      icon: null,
       loading: loading,
     },
     {
