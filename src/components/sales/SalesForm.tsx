@@ -1,0 +1,271 @@
+'use client';
+
+import { useState } from 'react';
+import { useFieldArray, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Button } from '@/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { PlusCircle, Trash2, Loader2 } from 'lucide-react';
+import type { Product } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
+import { Separator } from '../ui/separator';
+
+const salesFormSchema = z.object({
+  paymentMethod: z.string().min(1, 'Payment method is required.'),
+  discount: z.coerce.number().min(0).optional().default(0),
+  tax: z.coerce.number().min(0).optional().default(0),
+  items: z
+    .array(
+      z.object({
+        productId: z.string().min(1, 'Product is required.'),
+        quantity: z.coerce.number().min(1, 'Quantity must be at least 1.'),
+      })
+    )
+    .min(1, 'At least one item is required.'),
+});
+
+type SalesFormValues = z.infer<typeof salesFormSchema>;
+
+type SalesFormProps = {
+  products: Product[];
+};
+
+export default function SalesForm({ products }: SalesFormProps) {
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const form = useForm<SalesFormValues>({
+    resolver: zodResolver(salesFormSchema),
+    defaultValues: {
+      items: [{ productId: '', quantity: 1 }],
+      paymentMethod: 'Cash',
+      discount: 0,
+      tax: 0,
+    },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: 'items',
+  });
+  
+  const formatCurrency = (value: number) =>
+  new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'NPR', minimumFractionDigits: 0 }).format(value);
+
+  const watchedItems = form.watch('items');
+  const subtotal = watchedItems.reduce((acc, item) => {
+    const product = products.find((p) => p.id.toString() === item.productId);
+    return acc + (product ? product.pricePerUnit * item.quantity : 0);
+  }, 0);
+
+  const discountAmount = form.watch('discount') || 0;
+  const taxAmount = form.watch('tax') || 0;
+  const total = subtotal - discountAmount + taxAmount;
+
+
+  async function onSubmit(data: SalesFormValues) {
+    setIsLoading(true);
+    console.log({
+        ...data,
+        // customerId: 0, These would come from other form fields if needed
+        // userId: "string",
+    });
+
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    toast({
+      title: 'Sale Recorded',
+      description: 'The new sale has been successfully added.',
+    });
+    form.reset();
+    setIsLoading(false);
+  }
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>Sale Items</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {fields.map((field, index) => {
+              const selectedProductId = form.watch(`items.${index}.productId`);
+              const selectedProduct = products.find(p => p.id.toString() === selectedProductId);
+
+              return (
+                <div key={field.id} className="flex flex-col sm:flex-row items-start sm:items-end gap-4 p-4 border rounded-lg">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1 w-full">
+                  <FormField
+                    control={form.control}
+                    name={`items.${index}.productId`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Product</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a product" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {products.map((product) => (
+                              <SelectItem key={product.id} value={product.id.toString()}>
+                                {product.productName}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`items.${index}.quantity`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Quantity</FormLabel>
+                        <FormControl>
+                           <Input 
+                            type="number" 
+                            placeholder="1" {...field} 
+                            max={selectedProduct?.stockQuantity}
+                            min={1}
+                           />
+                        </FormControl>
+                        {selectedProduct && <p className="text-xs text-muted-foreground pt-1">Stock available: {selectedProduct.stockQuantity}</p>}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  </div>
+                  <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)}>
+                    <Trash2 className="h-4 w-4" />
+                    <span className="sr-only">Remove item</span>
+                  </Button>
+                </div>
+            )})}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="mt-2"
+              onClick={() => append({ productId: '', quantity: 1 })}
+            >
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Add Item
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader><CardTitle>Payment & Summary</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <FormField
+                    control={form.control}
+                    name="paymentMethod"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Payment Method</FormLabel>
+                         <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                                <SelectTrigger>
+                                <SelectValue placeholder="Select payment method" />
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                <SelectItem value="Cash">Cash</SelectItem>
+                                <SelectItem value="Card">Card</SelectItem>
+                                <SelectItem value="Digital">Digital</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                 <FormField
+                    control={form.control}
+                    name="discount"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Discount</FormLabel>
+                        <FormControl>
+                            <Input type="number" placeholder="0" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                <FormField
+                    control={form.control}
+                    name="tax"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Tax</FormLabel>
+                        <FormControl>
+                            <Input type="number" placeholder="0" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                 />
+                </div>
+                 <Separator className="my-4" />
+                 <div className="space-y-2 text-right">
+                    <div className="flex justify-between">
+                        <span className="text-muted-foreground">Subtotal</span>
+                        <span>{formatCurrency(subtotal)}</span>
+                    </div>
+                     <div className="flex justify-between">
+                        <span className="text-muted-foreground">Discount</span>
+                        <span>-{formatCurrency(discountAmount)}</span>
+                    </div>
+                     <div className="flex justify-between">
+                        <span className="text-muted-foreground">Tax</span>
+                        <span>+{formatCurrency(taxAmount)}</span>
+                    </div>
+                    <Separator />
+                     <div className="flex justify-between text-xl font-bold">
+                        <span>Total</span>
+                        <span>{formatCurrency(total)}</span>
+                    </div>
+                 </div>
+
+
+            </CardContent>
+            <CardFooter>
+                 <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
+                    {isLoading ? (
+                        <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Processing...
+                        </>
+                    ) : (
+                        'Complete Sale'
+                    )}
+                </Button>
+            </CardFooter>
+        </Card>
+      </form>
+    </Form>
+  );
+}
