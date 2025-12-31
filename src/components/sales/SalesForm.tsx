@@ -29,8 +29,6 @@ import { Separator } from '../ui/separator';
 
 const salesFormSchema = z.object({
   paymentMethod: z.string().min(1, 'Payment method is required.'),
-  discount: z.coerce.number().min(0).optional().default(0),
-  tax: z.coerce.number().min(0).optional().default(0),
   items: z
     .array(
       z.object({
@@ -55,8 +53,6 @@ export default function SalesForm({ products }: SalesFormProps) {
     defaultValues: {
       items: [{ productId: '', quantity: 1 }],
       paymentMethod: 'Cash',
-      discount: 0,
-      tax: 0,
     },
   });
 
@@ -69,14 +65,10 @@ export default function SalesForm({ products }: SalesFormProps) {
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'NPR', minimumFractionDigits: 0 }).format(value);
 
   const watchedItems = form.watch('items');
-  const subtotal = watchedItems.reduce((acc, item) => {
+  const total = watchedItems.reduce((acc, item) => {
     const product = products.find((p) => p.id.toString() === item.productId);
     return acc + (product ? product.pricePerUnit * item.quantity : 0);
   }, 0);
-
-  const discountAmount = form.watch('discount') || 0;
-  const taxAmount = form.watch('tax') || 0;
-  const total = subtotal - discountAmount + taxAmount;
 
 
   async function onSubmit(data: SalesFormValues) {
@@ -202,48 +194,9 @@ export default function SalesForm({ products }: SalesFormProps) {
                         </FormItem>
                     )}
                 />
-                 <FormField
-                    control={form.control}
-                    name="discount"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Discount</FormLabel>
-                        <FormControl>
-                            <Input type="number" placeholder="0" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                    />
-                <FormField
-                    control={form.control}
-                    name="tax"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Tax</FormLabel>
-                        <FormControl>
-                            <Input type="number" placeholder="0" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                 />
                 </div>
                  <Separator className="my-4" />
                  <div className="space-y-2 text-right">
-                    <div className="flex justify-between">
-                        <span className="text-muted-foreground">Subtotal</span>
-                        <span>{formatCurrency(subtotal)}</span>
-                    </div>
-                     <div className="flex justify-between">
-                        <span className="text-muted-foreground">Discount</span>
-                        <span>-{formatCurrency(discountAmount)}</span>
-                    </div>
-                     <div className="flex justify-between">
-                        <span className="text-muted-foreground">Tax</span>
-                        <span>+{formatCurrency(taxAmount)}</span>
-                    </div>
-                    <Separator />
                      <div className="flex justify-between text-xl font-bold">
                         <span>Total</span>
                         <span>{formatCurrency(total)}</span>
