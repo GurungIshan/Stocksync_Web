@@ -72,11 +72,9 @@ const AppBreadcrumb = () => {
       <Breadcrumb className="hidden md:flex">
         <BreadcrumbList>
           <BreadcrumbItem>
-            <Link href="/dashboard" passHref legacyBehavior>
-              <BreadcrumbLink asChild>
-                <a><Home className="h-4 w-4" /></a>
-              </BreadcrumbLink>
-            </Link>
+            <BreadcrumbLink asChild>
+              <Link href="/dashboard"><Home className="h-4 w-4" /></Link>
+            </BreadcrumbLink>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
@@ -87,11 +85,9 @@ const AppBreadcrumb = () => {
     <Breadcrumb className="hidden md:flex">
       <BreadcrumbList>
         <BreadcrumbItem>
-          <Link href="/dashboard" passHref legacyBehavior>
-            <BreadcrumbLink asChild>
-              <a><Home className="h-4 w-4" /></a>
-            </BreadcrumbLink>
-          </Link>
+          <BreadcrumbLink asChild>
+            <Link href="/dashboard"><Home className="h-4 w-4" /></Link>
+          </BreadcrumbLink>
         </BreadcrumbItem>
         {segments.map((segment, index) => {
           const href = `/${segments.slice(0, index + 1).join('/')}`;
@@ -105,11 +101,9 @@ const AppBreadcrumb = () => {
                 {isLast ? (
                   <BreadcrumbPage>{name}</BreadcrumbPage>
                 ) : (
-                  <Link href={href} passHref legacyBehavior>
-                    <BreadcrumbLink asChild>
-                      <a>{name}</a>
-                    </BreadcrumbLink>
-                  </Link>
+                  <BreadcrumbLink asChild>
+                     <Link href={href}>{name}</Link>
+                  </BreadcrumbLink>
                 )}
               </BreadcrumbItem>
             </Fragment>
