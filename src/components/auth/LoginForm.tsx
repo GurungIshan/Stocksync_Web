@@ -48,6 +48,7 @@ export function LoginForm() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email: values.email, password: values.password }),
+        cache: 'no-store',
       });
 
       if (response.ok) {
