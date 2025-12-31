@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -26,6 +26,7 @@ import { PlusCircle, Trash2, Loader2 } from 'lucide-react';
 import type { Product } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '../ui/separator';
+import { getProducts } from '@/lib/api';
 
 const salesFormSchema = z.object({
   paymentMethod: z.string().min(1, 'Payment method is required.'),
@@ -41,13 +42,31 @@ const salesFormSchema = z.object({
 
 type SalesFormValues = z.infer<typeof salesFormSchema>;
 
-type SalesFormProps = {
-  products: Product[];
-};
-
-export default function SalesForm({ products }: SalesFormProps) {
+export default function SalesForm() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isProductsLoading, setIsProductsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        const fetchedProducts = await getProducts();
+        setProducts(fetchedProducts);
+      } catch (error) {
+        toast({
+            variant: "destructive",
+            title: "Failed to load products",
+            description: "Could not fetch the product list. Please try again.",
+        })
+      } finally {
+        setIsProductsLoading(false);
+      }
+    }
+    fetchProducts();
+  }, [toast]);
+
+
   const form = useForm<SalesFormValues>({
     resolver: zodResolver(salesFormSchema),
     defaultValues: {
@@ -88,6 +107,14 @@ export default function SalesForm({ products }: SalesFormProps) {
     });
     form.reset();
     setIsLoading(false);
+  }
+
+  if (isProductsLoading) {
+    return (
+        <div className="flex justify-center items-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+    )
   }
 
   return (
