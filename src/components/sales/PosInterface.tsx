@@ -3,7 +3,7 @@ import { useState } from 'react';
 import type { Product } from '@/lib/types';
 import { useCart } from '@/context/CartContext';
 import ProductSearch from './ProductSearch';
-import ProductCard from '../inventory/ProductCard';
+import ProductCard from '@/components/inventory/ProductCard';
 import { Cart } from './Cart';
 
 type PosInterfaceProps = {
@@ -16,7 +16,7 @@ export function PosInterface({ products }: PosInterfaceProps) {
 
   const filteredProducts = products.filter(
     (product) =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.sku.toLowerCase().includes(searchTerm.toLowerCase())
   );
 

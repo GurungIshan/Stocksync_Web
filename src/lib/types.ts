@@ -40,16 +40,6 @@ export type Alert = {
 };
 
 export type CartItem = {
-  product: {
-    id: string;
-    name: string;
-    sku: string;
-    price: number;
-    stock: number;
-    reorderPoint: number;
-    category: string;
-    imageUrl: string;
-    imageHint: string;
-  };
+  product: Product;
   quantity: number;
 };

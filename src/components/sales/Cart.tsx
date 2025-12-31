@@ -34,15 +34,15 @@ export function Cart() {
             {cartItems.map((item) => (
               <div key={item.product.id} className="flex items-center gap-4">
                 <Image
-                  src={item.product.imageUrl}
-                  alt={item.product.name}
+                  src={`https://picsum.photos/seed/${item.product.id}/64/64`}
+                  alt={item.product.productName}
                   width={64}
                   height={64}
                   className="rounded-md object-cover"
                 />
                 <div className="flex-1">
-                  <p className="font-medium">{item.product.name}</p>
-                  <p className="text-sm text-muted-foreground">{formatCurrency(item.product.price)}</p>
+                  <p className="font-medium">{item.product.productName}</p>
+                  <p className="text-sm text-muted-foreground">{formatCurrency(item.product.pricePerUnit)}</p>
                 </div>
                 <Input
                   type="number"
@@ -50,7 +50,7 @@ export function Cart() {
                   onChange={(e) => updateQuantity(item.product.id, parseInt(e.target.value))}
                   className="h-9 w-16 text-center"
                   min="0"
-                  max={item.product.stock}
+                  max={item.product.stockQuantity}
                 />
                 <Button variant="ghost" size="icon" onClick={() => removeFromCart(item.product.id)}>
                   <Trash2 className="h-4 w-4" />
