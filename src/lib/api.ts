@@ -18,16 +18,22 @@ async function getAuthHeaders() {
 
 
 export async function getProducts(): Promise<Product[]> {
+  const token = getToken();
+  if (!token) {
+    console.log("No auth token found, skipping product fetch.");
+    return [];
+  }
+
   try {
-    const headers = await getAuthHeaders();
-    if (!headers) {
-        console.log("No auth token found, skipping product fetch.");
-        return [];
-    }
-    const response = await fetch('/api/Product', { 
-        cache: 'no-store',
-        headers: headers 
+    const response = await fetch('/api/Product', {
+        method: 'GET',
+        headers: {
+            'accept': '*/*',
+            'Authorization': `Bearer ${token}`
+        },
+        cache: 'no-store'
     });
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }

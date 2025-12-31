@@ -2,7 +2,7 @@
 'use client';
 import { useEffect, useState } from "react";
 import type { Product } from "@/lib/types";
-import { getProducts } from "@/lib/api";
+import { getToken } from "@/lib/auth";
 import {
   Table,
   TableBody,
@@ -31,9 +31,33 @@ export default function ProductTable() {
     useEffect(() => {
         async function fetchProducts() {
             setLoading(true);
-            const fetchedProducts = await getProducts();
-            setProducts(fetchedProducts);
-            setLoading(false);
+            const token = getToken();
+            if (!token) {
+                console.log("No auth token found, skipping product fetch.");
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/Product', {
+                    method: 'GET',
+                    headers: {
+                        'accept': '*/*',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    cache: 'no-store'
+                });
+
+                if (!response.ok) {
+                  throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                setProducts(data);
+            } catch (error) {
+                console.error('Failed to fetch products:', error);
+            } finally {
+                setLoading(false);
+            }
         }
         fetchProducts();
     }, []);

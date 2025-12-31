@@ -26,7 +26,7 @@ import { PlusCircle, Trash2, Loader2 } from 'lucide-react';
 import type { Product } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '../ui/separator';
-import { getProducts } from '@/lib/api';
+import { getToken } from '@/lib/auth';
 
 const salesFormSchema = z.object({
   paymentMethod: z.string().min(1, 'Payment method is required.'),
@@ -50,8 +50,30 @@ export default function SalesForm() {
 
   useEffect(() => {
     async function fetchProducts() {
+        const token = getToken();
+        if (!token) {
+            toast({
+                variant: "destructive",
+                title: "Authentication Error",
+                description: "You must be logged in to fetch products.",
+            })
+            setIsProductsLoading(false);
+            return;
+        }
+
       try {
-        const fetchedProducts = await getProducts();
+        const response = await fetch('/api/Product', {
+            method: 'GET',
+            headers: {
+                'accept': '*/*',
+                'Authorization': `Bearer ${token}`
+            },
+            cache: 'no-store'
+        });
+        if (!response.ok) {
+            throw new Error('Failed to fetch products');
+        }
+        const fetchedProducts = await response.json();
         setProducts(fetchedProducts);
       } catch (error) {
         toast({
