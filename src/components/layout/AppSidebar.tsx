@@ -32,16 +32,14 @@ export default function AppSidebar() {
         <SidebarMenu>
           {navLinks.map((link) => (
             <SidebarMenuItem key={link.href}>
-              <Link href={link.href} passHref>
+              <Link href={link.href} passHref legacyBehavior>
                 <SidebarMenuButton
-                  asChild
+                  as="a"
                   isActive={pathname.startsWith(link.href)}
                   tooltip={link.label}
                 >
-                  <a>
-                    <link.icon />
-                    <span>{link.label}</span>
-                  </a>
+                  <link.icon />
+                  <span>{link.label}</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
@@ -51,12 +49,10 @@ export default function AppSidebar() {
       <SidebarFooter>
         <SidebarMenu>
             <SidebarMenuItem>
-                <Link href={settingsLink.href} passHref>
-                    <SidebarMenuButton asChild isActive={pathname.startsWith(settingsLink.href)} tooltip={settingsLink.label}>
-                        <a>
-                            <settingsLink.icon />
-                            <span>{settingsLink.label}</span>
-                        </a>
+                <Link href={settingsLink.href} passHref legacyBehavior>
+                    <SidebarMenuButton as="a" isActive={pathname.startsWith(settingsLink.href)} tooltip={settingsLink.label}>
+                        <settingsLink.icon />
+                        <span>{settingsLink.label}</span>
                     </SidebarMenuButton>
                 </Link>
             </SidebarMenuItem>
