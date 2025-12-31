@@ -1,21 +1,10 @@
+
 import { products as mockProducts, categories, sales, alerts } from '@/lib/data';
 import type { Product, Category, Sale, Alert } from './types';
 import { getToken } from './auth';
 
 // Simulate API delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-async function getAuthHeaders() {
-    const token = getToken();
-    if (!token) {
-        return null;
-    }
-    return {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-    };
-}
-
 
 export async function getProducts(): Promise<Product[]> {
   const token = getToken();
@@ -25,7 +14,7 @@ export async function getProducts(): Promise<Product[]> {
   }
 
   try {
-    const response = await fetch('/api/Product', {
+    const response = await fetch('https://localhost:7232/api/Product', {
         method: 'GET',
         headers: {
             'accept': '*/*',
@@ -75,18 +64,13 @@ export async function getReorderAlerts(): Promise<Alert[]> {
 
 export async function getDashboardStats() {
     await delay(800);
-    const products = await getProducts();
-    const totalProducts = products.length;
     const lowStockItems = alerts.length;
     const todaySales = await getTodaysSales();
     const todaysRevenue = todaySales.reduce((sum, sale) => sum + sale.total, 0);
-    const inventoryValue = products.reduce((sum, p) => sum + p.pricePerUnit * p.stockQuantity, 0);
 
     return {
-        totalProducts,
         lowStockItems,
         todaysRevenue,
-        inventoryValue
     };
 }
 
