@@ -39,7 +39,7 @@ export default function ProductTable() {
             }
 
             try {
-                const response = await fetch('/api/Product', {
+                const response = await fetch('https://localhost:7232/api/Product', {
                     method: 'GET',
                     headers: {
                         'accept': '*/*',
