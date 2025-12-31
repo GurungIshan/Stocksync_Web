@@ -63,7 +63,7 @@ export default function SalesForm() {
         }
 
       try {
-        const response = await fetch('https://localhost:7232/api/Product', {
+        const response = await fetch('/api/Product', {
             method: 'GET',
             headers: {
                 'accept': '*/*',
@@ -136,7 +136,7 @@ export default function SalesForm() {
     });
 
     try {
-        const response = await fetch('https://localhost:7232/api/Sale', {
+        const response = await fetch('/api/Sale', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

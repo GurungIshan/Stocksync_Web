@@ -40,7 +40,7 @@ export default function ProductTable({ selectedCategory }: ProductTableProps) {
                 return;
             }
 
-            let url = 'https://localhost:7232/api/Product';
+            let url = '/api/Product';
             if (selectedCategory) {
                 url += `?categoryId=${selectedCategory}`;
             }
