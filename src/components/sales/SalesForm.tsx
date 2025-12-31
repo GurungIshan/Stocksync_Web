@@ -33,7 +33,7 @@ const salesFormSchema = z.object({
   items: z
     .array(
       z.object({
-        productId: z.string().min(1, 'Product is required.'),
+        productId: z.coerce.number().min(1, 'Product is required.'),
         quantity: z.coerce.number().min(1, 'Quantity must be at least 1.'),
       })
     )
@@ -92,7 +92,7 @@ export default function SalesForm() {
   const form = useForm<SalesFormValues>({
     resolver: zodResolver(salesFormSchema),
     defaultValues: {
-      items: [{ productId: '', quantity: 1 }],
+      items: [{ productId: 0, quantity: 1 }],
       paymentMethod: 'Cash',
     },
   });
@@ -107,28 +107,62 @@ export default function SalesForm() {
 
   const watchedItems = form.watch('items');
   const total = watchedItems.reduce((acc, item) => {
-    const product = products.find((p) => p.id.toString() === item.productId);
+    const product = products.find((p) => p.id === item.productId);
     return acc + (product ? product.pricePerUnit * item.quantity : 0);
   }, 0);
 
 
   async function onSubmit(data: SalesFormValues) {
     setIsLoading(true);
-    console.log({
-        ...data,
-        // customerId: 0, These would come from other form fields if needed
-        // userId: "string",
-    });
+    const token = getToken();
+    if (!token) {
+        toast({
+            variant: "destructive",
+            title: "Authentication Error",
+            description: "You must be logged in to record a sale.",
+        });
+        setIsLoading(false);
+        return;
+    }
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+        const response = await fetch('https://localhost:7232/api/Sale', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                paymentMethod: data.paymentMethod,
+                items: data.items,
+                discount: 0, // Not implemented
+                tax: 0, // Not implemented
+            })
+        });
 
-    toast({
-      title: 'Sale Recorded',
-      description: 'The new sale has been successfully added.',
-    });
-    form.reset();
-    setIsLoading(false);
+        if (response.ok) {
+            toast({
+              title: 'Sale Recorded',
+              description: 'The new sale has been successfully added.',
+            });
+            form.reset();
+        } else {
+             const errorData = await response.json().catch(() => ({ message: 'Failed to record sale. Please try again.' }));
+             toast({
+                variant: 'destructive',
+                title: 'Sale Failed',
+                description: errorData.message || 'An unknown error occurred.',
+            });
+        }
+    } catch (error) {
+         toast({
+            variant: 'destructive',
+            title: 'Network Error',
+            description: 'Could not connect to the server. Please try again later.',
+        });
+    } finally {
+        setIsLoading(false);
+    }
   }
 
   if (isProductsLoading) {
@@ -149,7 +183,7 @@ export default function SalesForm() {
           <CardContent className="space-y-4">
             {fields.map((field, index) => {
               const selectedProductId = form.watch(`items.${index}.productId`);
-              const selectedProduct = products.find(p => p.id.toString() === selectedProductId);
+              const selectedProduct = products.find(p => p.id === selectedProductId);
 
               return (
                 <div key={field.id} className="flex flex-col sm:flex-row items-start sm:items-end gap-4 p-4 border rounded-lg">
@@ -160,7 +194,7 @@ export default function SalesForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Product</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={field.value > 0 ? field.value.toString() : ""}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select a product" />
@@ -209,7 +243,7 @@ export default function SalesForm() {
               variant="outline"
               size="sm"
               className="mt-2"
-              onClick={() => append({ productId: '', quantity: 1 })}
+              onClick={() => append({ productId: 0, quantity: 1 })}
             >
               <PlusCircle className="mr-2 h-4 w-4" />
               Add Item

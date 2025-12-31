@@ -1,20 +1,24 @@
 
-import { products as mockProducts, sales, alerts } from '@/lib/data';
 import type { Product, Category, Sale, Alert } from './types';
 import { getToken } from './auth';
 
 // Simulate API delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-export async function getProducts(): Promise<Product[]> {
+export async function getProducts(categoryId?: string | null): Promise<Product[]> {
   const token = getToken();
   if (!token) {
     console.log("No auth token found, skipping product fetch.");
     return [];
   }
 
+  let url = 'https://localhost:7232/api/Product';
+  if (categoryId) {
+      url += `?categoryId=${categoryId}`;
+  }
+
   try {
-    const response = await fetch('https://localhost:7232/api/Product', {
+    const response = await fetch(url, {
         method: 'GET',
         headers: {
             'accept': '*/*',
@@ -35,9 +39,9 @@ export async function getProducts(): Promise<Product[]> {
 }
 
 export async function getProductById(id: string): Promise<any | undefined> {
-  await delay(200);
   // This needs to be adapted to your API or mocked data structure
-  return mockProducts.find(p => p.id === id);
+   const products = await getProducts();
+   return products.find(p => p.id.toString() === id);
 }
 
 export async function getCategories(): Promise<Category[]> {
@@ -67,41 +71,68 @@ export async function getCategories(): Promise<Category[]> {
 }
 
 export async function getSales(): Promise<Sale[]> {
-  await delay(600);
-  return sales.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-}
-
-export async function getTodaysSales(): Promise<Sale[]> {
-    await delay(400);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return sales.filter(s => s.createdAt >= today);
+  const token = getToken();
+  if (!token) return [];
+  try {
+    const res = await fetch('https://localhost:7232/api/Sale', {
+      headers: { 'Authorization': `Bearer ${token}` },
+      cache: 'no-store',
+    });
+    if (!res.ok) throw new Error('Failed to fetch sales');
+    const sales = await res.json();
+    // Assuming the API returns dates as strings
+    return sales.map((s: any) => ({ ...s, createdAt: new Date(s.createdAt) }))
+                .sort((a: Sale, b: Sale) => b.createdAt.getTime() - a.createdAt.getTime());
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
 }
 
 export async function getReorderAlerts(): Promise<Alert[]> {
-  await delay(700);
-  return alerts;
+    const token = getToken();
+    if (!token) return [];
+    try {
+        const res = await fetch('https://localhost:7232/api/Dashboard/reorder-alerts', {
+            headers: { 'Authorization': `Bearer ${token}` },
+            cache: 'no-store',
+        });
+        if (!res.ok) throw new Error('Failed to fetch alerts');
+        return await res.json();
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
 }
 
 export async function getDashboardStats() {
-    await delay(800);
-    const lowStockItems = alerts.length;
-    const todaySales = await getTodaysSales();
-    const todaysRevenue = todaySales.reduce((sum, sale) => sum + sale.total, 0);
-
-    return {
-        lowStockItems,
-        todaysRevenue,
-    };
+    const token = getToken();
+    if (!token) return { todaysRevenue: 0, lowStockItems: 0 };
+     try {
+        const res = await fetch('https://localhost:7232/api/Dashboard/stats', {
+            headers: { 'Authorization': `Bearer ${token}` },
+            cache: 'no-store',
+        });
+        if (!res.ok) throw new Error('Failed to fetch dashboard stats');
+        return await res.json();
+    } catch (error) {
+        console.error(error);
+        return { todaysRevenue: 0, lowStockItems: 0 };
+    }
 }
 
 export async function getTopSellingProducts(): Promise<{productName: string; amount: number}[]> {
-    await delay(1000);
-    // This is a simplified logic. A real API would calculate this from sales data.
-    return [
-        { productName: 'Wireless Mouse', amount: 7000 },
-        { productName: 'Men\'s T-Shirt', amount: 2400 },
-        { productName: 'The Alchemist', amount: 800 },
-        { productName: 'Scented Candle', amount: 500 },
-    ];
+    const token = getToken();
+    if (!token) return [];
+     try {
+        const res = await fetch('https://localhost:7232/api/Dashboard/top-selling', {
+            headers: { 'Authorization': `Bearer ${token}` },
+            cache: 'no-store',
+        });
+        if (!res.ok) throw new Error('Failed to fetch top selling products');
+        return await res.json();
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
 }

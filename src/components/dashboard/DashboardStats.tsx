@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -11,47 +10,47 @@ import {
 import { DollarSign, Package, AlertCircle, ShoppingCart, Loader2 } from 'lucide-react';
 import { getToken } from '@/lib/auth';
 import type { Product } from '@/lib/types';
+import { getDashboardStats } from '@/lib/api';
 
-type DashboardStatsProps = {
-  initialStats: {
-    todaysRevenue: number;
-    lowStockItems: number;
-  };
-};
-
-export default function DashboardStats({ initialStats }: DashboardStatsProps) {
+export default function DashboardStats() {
+  const [stats, setStats] = useState({ todaysRevenue: 0, lowStockItems: 0 });
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchProducts() {
+    async function fetchAllStats() {
+      setLoading(true);
       const token = getToken();
       if (!token) {
         setLoading(false);
         return;
       }
       try {
-        const response = await fetch('https://localhost:7232/api/Product', {
-          method: 'GET',
-          headers: {
-            'accept': '*/*',
-            'Authorization': `Bearer ${token}`
-          },
-          cache: 'no-store'
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setProducts(data);
+        // Fetch stats and products in parallel
+        const [statsData, productsResponse] = await Promise.all([
+          getDashboardStats(),
+          fetch('https://localhost:7232/api/Product', {
+            headers: { 'Authorization': `Bearer ${token}` },
+            cache: 'no-store'
+          })
+        ]);
+
+        setStats(statsData);
+
+        if (productsResponse.ok) {
+          const productsData = await productsResponse.json();
+          setProducts(productsData);
         } else {
           console.error('Failed to fetch products for stats');
         }
+
       } catch (error) {
-        console.error('Error fetching products for stats:', error);
+        console.error('Error fetching dashboard data:', error);
       } finally {
         setLoading(false);
       }
     }
-    fetchProducts();
+    fetchAllStats();
   }, []);
 
   const formatCurrency = (value: number) =>
@@ -63,15 +62,15 @@ export default function DashboardStats({ initialStats }: DashboardStatsProps) {
   const statCards = [
     {
       title: "Today's Revenue",
-      value: formatCurrency(initialStats.todaysRevenue),
+      value: formatCurrency(stats.todaysRevenue),
       icon: <DollarSign className="h-5 w-5 text-muted-foreground" />,
-      loading: false,
+      loading: loading,
     },
     {
       title: 'Low Stock Items',
-      value: initialStats.lowStockItems,
+      value: stats.lowStockItems,
       icon: <AlertCircle className="h-5 w-5 text-muted-foreground" />,
-      loading: false,
+      loading: loading,
     },
     {
       title: 'Total Products',
@@ -96,8 +95,8 @@ export default function DashboardStats({ initialStats }: DashboardStatsProps) {
             {card.icon}
           </CardHeader>
           <CardContent>
-            {card.loading ? (
-                 <div className="flex justify-center items-center h-8">
+            {card.loading && card.value === 0 || (card.loading && typeof card.value === 'string' && card.value.includes('0')) ? (
+                 <div className="flex justify-start items-center h-8">
                     <Loader2 className="h-6 w-6 animate-spin text-primary" />
                  </div>
             ) : (
