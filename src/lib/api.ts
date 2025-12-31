@@ -7,6 +7,9 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function getAuthHeaders() {
     const token = getToken();
+    if (!token) {
+        return null;
+    }
     return {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -17,6 +20,10 @@ async function getAuthHeaders() {
 export async function getProducts(): Promise<Product[]> {
   try {
     const headers = await getAuthHeaders();
+    if (!headers) {
+        console.log("No auth token found, skipping product fetch.");
+        return [];
+    }
     const response = await fetch('/api/Product', { 
         cache: 'no-store',
         headers: headers 
