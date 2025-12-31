@@ -30,9 +30,16 @@ import {
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Fragment, useMemo } from 'react';
+import { removeToken } from '@/lib/auth';
 
 const UserMenu = () => {
     const router = useRouter();
+
+    const handleLogout = () => {
+      removeToken();
+      router.push('/login');
+    }
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -50,7 +57,7 @@ const UserMenu = () => {
             <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuItem>Support</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => router.push('/login')}><LogOut className="mr-2 h-4 w-4"/>Logout</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}><LogOut className="mr-2 h-4 w-4"/>Logout</DropdownMenuItem>
             </DropdownMenuContent>
       </DropdownMenu>
     )

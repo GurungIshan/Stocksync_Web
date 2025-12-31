@@ -1,13 +1,26 @@
 import { products as mockProducts, categories, sales, alerts } from '@/lib/data';
 import type { Product, Category, Sale, Alert } from './types';
+import { getToken } from './auth';
 
 // Simulate API delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+async function getAuthHeaders() {
+    const token = getToken();
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    };
+}
+
+
 export async function getProducts(): Promise<Product[]> {
   try {
-    // The base URL is handled by the rewrite in next.config.ts
-    const response = await fetch('/api/Product', { cache: 'no-store' });
+    const headers = await getAuthHeaders();
+    const response = await fetch('/api/Product', { 
+        cache: 'no-store',
+        headers: headers 
+    });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -49,11 +62,12 @@ export async function getReorderAlerts(): Promise<Alert[]> {
 
 export async function getDashboardStats() {
     await delay(800);
-    const totalProducts = mockProducts.length;
+    const products = await getProducts();
+    const totalProducts = products.length;
     const lowStockItems = alerts.length;
     const todaySales = await getTodaysSales();
     const todaysRevenue = todaySales.reduce((sum, sale) => sum + sale.total, 0);
-    const inventoryValue = mockProducts.reduce((sum, p) => sum + p.price * p.stock, 0);
+    const inventoryValue = products.reduce((sum, p) => sum + p.pricePerUnit * p.stockQuantity, 0);
 
     return {
         totalProducts,

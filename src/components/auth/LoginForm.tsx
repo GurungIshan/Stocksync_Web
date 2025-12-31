@@ -18,6 +18,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { LogIn, Eye, EyeOff } from 'lucide-react';
+import { saveToken } from '@/lib/auth';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address.' }),
@@ -50,6 +51,8 @@ export function LoginForm() {
       });
 
       if (response.ok) {
+        const data = await response.json();
+        saveToken(data.token);
         toast({
           title: 'Login Successful',
           description: 'Welcome!',
