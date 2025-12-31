@@ -24,7 +24,7 @@ export default function AppSidebar() {
                 <Package className="h-6 w-6" />
             </div>
           <span className="text-lg font-semibold font-headline text-sidebar-foreground group-data-[collapsible=icon]:hidden">
-            StockWise
+            StockSync
           </span>
         </div>
       </SidebarHeader>
@@ -32,9 +32,8 @@ export default function AppSidebar() {
         <SidebarMenu>
           {navLinks.map((link) => (
             <SidebarMenuItem key={link.href}>
-              <Link href={link.href} passHref legacyBehavior>
+              <Link href={link.href}>
                 <SidebarMenuButton
-                  as="a"
                   isActive={pathname.startsWith(link.href)}
                   tooltip={link.label}
                 >
@@ -49,8 +48,8 @@ export default function AppSidebar() {
       <SidebarFooter>
         <SidebarMenu>
             <SidebarMenuItem>
-                <Link href={settingsLink.href} passHref legacyBehavior>
-                    <SidebarMenuButton as="a" isActive={pathname.startsWith(settingsLink.href)} tooltip={settingsLink.label}>
+                <Link href={settingsLink.href}>
+                    <SidebarMenuButton isActive={pathname.startsWith(settingsLink.href)} tooltip={settingsLink.label}>
                         <settingsLink.icon />
                         <span>{settingsLink.label}</span>
                     </SidebarMenuButton>
