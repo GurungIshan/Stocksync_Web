@@ -107,17 +107,29 @@ export async function getReorderAlerts(): Promise<Alert[]> {
 
 export async function getDashboardStats() {
     const token = getToken();
-    if (!token) return { todaysRevenue: 0, lowStockItems: 0 };
+    if (!token) return { monthlyRevenue: 0, lowStockItems: 0 };
      try {
-        const res = await fetch('/api/Dashboard/stats', {
-            headers: { 'Authorization': `Bearer ${token}` },
-            cache: 'no-store',
-        });
-        if (!res.ok) throw new Error('Failed to fetch dashboard stats');
-        return await res.json();
+        const [revenueRes, alertsRes] = await Promise.all([
+            fetch('/api/Sales/monthly-revenue', {
+                headers: { 'Authorization': `Bearer ${token}` },
+                cache: 'no-store',
+            }),
+            fetch('/api/Dashboard/reorder-alerts', {
+                headers: { 'Authorization': `Bearer ${token}` },
+                cache: 'no-store',
+            })
+        ]);
+
+        if (!revenueRes.ok) throw new Error('Failed to fetch monthly revenue');
+        if (!alertsRes.ok) throw new Error('Failed to fetch reorder alerts');
+
+        const monthlyRevenue = await revenueRes.json();
+        const lowStockItems = (await alertsRes.json()).length;
+
+        return { monthlyRevenue, lowStockItems };
     } catch (error) {
-        console.error(error);
-        return { todaysRevenue: 0, lowStockItems: 0 };
+        console.error('Failed to fetch dashboard stats:', error);
+        return { monthlyRevenue: 0, lowStockItems: 0 };
     }
 }
 

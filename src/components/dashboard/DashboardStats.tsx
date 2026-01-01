@@ -13,7 +13,7 @@ import type { Product } from '@/lib/types';
 import { getDashboardStats } from '@/lib/api';
 
 export default function DashboardStats() {
-  const [stats, setStats] = useState({ todaysRevenue: 0, lowStockItems: 0 });
+  const [stats, setStats] = useState({ monthlyRevenue: 0, lowStockItems: 0 });
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -54,15 +54,15 @@ export default function DashboardStats() {
   }, []);
 
   const formatCurrency = (value: number) =>
-    `Nrs ${new Intl.NumberFormat('en-IN').format(value)}`;
+    `Nrs. ${new Intl.NumberFormat('en-IN').format(value)}`;
 
   const totalProducts = products.length;
   const inventoryValue = products.reduce((sum, p) => sum + p.pricePerUnit * p.stockQuantity, 0);
 
   const statCards = [
     {
-      title: "Today's Revenue",
-      value: formatCurrency(stats.todaysRevenue),
+      title: "Monthly Revenue",
+      value: formatCurrency(stats.monthlyRevenue),
       icon: null,
       loading: loading,
     },
