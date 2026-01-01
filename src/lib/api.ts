@@ -137,7 +137,7 @@ export async function getTopSellingProducts(): Promise<{productName: string; amo
     const token = getToken();
     if (!token) return [];
      try {
-        const res = await fetch('/api/Dashboard/top-selling', {
+        const res = await fetch('/api/Sales/top-selling', {
             headers: { 'Authorization': `Bearer ${token}` },
             cache: 'no-store',
         });
