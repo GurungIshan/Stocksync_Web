@@ -1,7 +1,6 @@
 'use client';
 import { useEffect, useState } from "react";
 import type { Product } from "@/lib/types";
-import { getToken } from "@/lib/auth";
 import {
   Table,
   TableBody,
@@ -21,6 +20,7 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { getProducts } from "@/lib/api";
 
 type ProductTableProps = {
     selectedCategory: string | null;
@@ -33,32 +33,8 @@ export default function ProductTable({ selectedCategory }: ProductTableProps) {
     useEffect(() => {
         async function fetchProducts() {
             setLoading(true);
-            const token = getToken();
-            if (!token) {
-                console.log("No auth token found, skipping product fetch.");
-                setLoading(false);
-                return;
-            }
-
-            let url = 'https://localhost:7232/api/Product';
-            if (selectedCategory) {
-                url += `?categoryId=${selectedCategory}`;
-            }
-
             try {
-                const response = await fetch(url, {
-                    method: 'GET',
-                    headers: {
-                        'accept': '*/*',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    cache: 'no-store'
-                });
-
-                if (!response.ok) {
-                  throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
+                const data = await getProducts(selectedCategory);
                 setProducts(data);
             } catch (error) {
                 console.error('Failed to fetch products:', error);
