@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getCategories } from "@/lib/api";
 import ProductTable from "@/components/inventory/ProductTable";
 import ProductFilters from "@/components/inventory/ProductFilters";
@@ -10,13 +10,13 @@ export default function ProductsPage() {
     const [categories, setCategories] = useState<Category[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-    useState(() => {
+    useEffect(() => {
         const fetchCategories = async () => {
             const fetchedCategories = await getCategories();
             setCategories(fetchedCategories);
         };
         fetchCategories();
-    });
+    }, []);
 
     return (
         <div className="flex flex-col gap-6">
