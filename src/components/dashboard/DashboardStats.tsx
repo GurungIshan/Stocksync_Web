@@ -29,7 +29,7 @@ export default function DashboardStats() {
         // Fetch stats and products in parallel
         const [statsData, productsResponse] = await Promise.all([
           getDashboardStats(),
-          fetch('/api/Product', {
+          fetch('https://localhost:7232/api/Product', {
             headers: { 'Authorization': `Bearer ${token}` },
             cache: 'no-store'
           })

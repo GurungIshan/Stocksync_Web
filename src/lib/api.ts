@@ -12,7 +12,7 @@ export async function getProducts(categoryId?: string | null): Promise<Product[]
     return [];
   }
 
-  let url = '/api/Product';
+  let url = 'https://localhost:7232/api/Product';
   if (categoryId) {
       url += `?categoryId=${categoryId}`;
   }
@@ -51,7 +51,7 @@ export async function getCategories(): Promise<Category[]> {
     return [];
   }
   try {
-     const response = await fetch('/api/Category', {
+     const response = await fetch('https://localhost:7232/api/Category/Categorydropdown', {
         method: 'GET',
         headers: {
             'accept': '*/*',
@@ -110,11 +110,11 @@ export async function getDashboardStats() {
     if (!token) return { monthlyRevenue: 0, lowStockItems: 0 };
      try {
         const [revenueRes, alertsRes] = await Promise.all([
-            fetch('/api/Sales/monthly-revenue', {
+            fetch('https://localhost:7232/api/Sales/monthly-revenue', {
                 headers: { 'Authorization': `Bearer ${token}` },
                 cache: 'no-store',
             }),
-            fetch('/api/Dashboard/reorder-alerts', {
+            fetch('', {
                 headers: { 'Authorization': `Bearer ${token}` },
                 cache: 'no-store',
             })

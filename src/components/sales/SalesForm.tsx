@@ -29,13 +29,14 @@ import { Separator } from '../ui/separator';
 import { getToken } from '@/lib/auth';
 
 const salesFormSchema = z.object({
+  customerPhoneNumber: z.string().optional(),
   paymentMethod: z.string().min(1, 'Payment method is required.'),
   items: z
     .array(
       z.object({
         productId: z.coerce.number().min(1, 'Product is required.'),
         quantity: z.coerce.number().min(1, 'Quantity must be at least 1.'),
-        pricePerUnit: z.coerce.number().optional(), // Now optional in schema
+        pricePerUnit: z.coerce.number().optional(),
       })
     )
     .min(1, 'At least one item is required.'),
@@ -93,6 +94,7 @@ export default function SalesForm() {
   const form = useForm<SalesFormValues>({
     resolver: zodResolver(salesFormSchema),
     defaultValues: {
+      customerPhoneNumber: '',
       items: [{ productId: 0, quantity: 1 }],
       paymentMethod: 'Cash',
     },
@@ -125,6 +127,31 @@ export default function SalesForm() {
         setIsLoading(false);
         return;
     }
+    
+    // Frontend validation before submitting
+    let hasValidationError = false;
+    data.items.forEach((item, index) => {
+      const product = products.find(p => p.id === item.productId);
+      if (product && item.quantity > product.stockQuantity) {
+        form.setError(`items.${index}.quantity`, {
+          type: "manual",
+          message: `Cannot exceed available stock of ${product.stockQuantity}.`
+        });
+        hasValidationError = true;
+      }
+      if (item.quantity < 1) {
+        form.setError(`items.${index}.quantity`, {
+          type: "manual",
+          message: "Quantity must be at least 1."
+        });
+        hasValidationError = true;
+      }
+    });
+
+    if (hasValidationError) {
+      setIsLoading(false);
+      return;
+    }
 
     const itemsPayload = data.items.map(item => {
         const product = products.find(p => p.id === item.productId);
@@ -143,6 +170,7 @@ export default function SalesForm() {
                 'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({
+                customerPhoneNumber: data.customerPhoneNumber,
                 paymentMethod: data.paymentMethod,
                 items: itemsPayload,
             })
@@ -229,12 +257,31 @@ export default function SalesForm() {
                         <FormControl>
                            <Input 
                             type="number" 
-                            placeholder="1" {...field} 
+                            placeholder="1" 
+                            {...field}
                             max={selectedProduct ? selectedProduct.stockQuantity : undefined}
                             min={1}
+                            onChange={(e) => {
+                                const value = e.target.valueAsNumber;
+                                if(selectedProduct && value > selectedProduct.stockQuantity) {
+                                    form.setError(`items.${index}.quantity`, {
+                                        type: 'manual',
+                                        message: `Stock available: ${selectedProduct.stockQuantity}`
+                                    });
+                                } else if (value < 1) {
+                                    form.setError(`items.${index}.quantity`, {
+                                        type: 'manual',
+                                        message: 'Quantity must be at least 1.'
+                                    });
+                                }
+                                else {
+                                    form.clearErrors(`items.${index}.quantity`);
+                                }
+                                field.onChange(value);
+                            }}
                            />
                         </FormControl>
-                        {selectedProduct && <p className="text-xs text-muted-foreground pt-1">Stock available: {selectedProduct.stockQuantity}</p>}
+                         {selectedProduct && form.getFieldState(`items.${index}.quantity`).invalid ? null : <p className="text-xs text-muted-foreground pt-1">{selectedProduct ? `Stock available: ${selectedProduct.stockQuantity}`: ""}</p>}
                         <FormMessage />
                       </FormItem>
                     )}
@@ -262,7 +309,20 @@ export default function SalesForm() {
         <Card>
             <CardHeader><CardTitle>Payment & Summary</CardTitle></CardHeader>
             <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                    control={form.control}
+                    name="customerPhoneNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Customer Phone (Optional)</FormLabel>
+                        <FormControl>
+                          <Input type="tel" placeholder="Enter phone number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 <FormField
                     control={form.control}
                     name="paymentMethod"
