@@ -44,7 +44,7 @@ export function LoginForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/Auth/login', {
+      const response = await fetch('https://localhost:7232/api/Auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -58,7 +58,7 @@ export function LoginForm() {
         saveToken(data.token);
 
         // Fetch user details and then login
-        const userDetailsResponse = await fetch('/api/Auth/user', {
+        const userDetailsResponse = await fetch('https://localhost:7232/api/Auth/user', {
           headers: {
             'Authorization': `Bearer ${data.token}`,
           },

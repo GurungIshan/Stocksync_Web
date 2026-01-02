@@ -31,7 +31,7 @@ import { useAuth } from '@/hooks/use-auth';
 
 const UserMenu = () => {
     const router = useRouter();
-    const { user, logout } = useAuth();
+    const { logout } = useAuth();
 
     const handleLogout = () => {
       logout();
@@ -51,15 +51,6 @@ const UserMenu = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            {user && (
-              <>
-                <DropdownMenuSeparator />
-                <div className='px-2 py-1.5 text-sm'>
-                  <p className='font-medium'>{user.fullName}</p>
-                  <p className='text-xs text-muted-foreground'>{user.email}</p>
-                </div>
-              </>
-            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuItem>Support</DropdownMenuItem>
