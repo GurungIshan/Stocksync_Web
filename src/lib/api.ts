@@ -12,7 +12,7 @@ export async function getProducts(categoryId?: string | null): Promise<Product[]
     return [];
   }
 
-  let url = '/api/Product';
+  let url = 'https://localhost:7232/api/Product';
   if (categoryId) {
       url += `?categoryId=${categoryId}`;
   }
@@ -51,7 +51,7 @@ export async function getCategories(): Promise<Category[]> {
     return [];
   }
   try {
-     const response = await fetch('/api/Category/Categorydropdown', {
+     const response = await fetch('https://localhost:7232/api/Category/Categorydropdown', {
         method: 'GET',
         headers: {
             'accept': '*/*',
@@ -74,7 +74,7 @@ export async function getSales(): Promise<Sale[]> {
   const token = getToken();
   if (!token) return [];
   try {
-    const res = await fetch('/api/Sale', {
+    const res = await fetch('https://localhost:7232/api/Sale', {
       headers: { 'Authorization': `Bearer ${token}` },
       cache: 'no-store',
     });
@@ -93,7 +93,7 @@ export async function getReorderAlerts(): Promise<Alert[]> {
     const token = getToken();
     if (!token) return [];
     try {
-        const res = await fetch('/api/Dashboard/reorder-alerts', {
+        const res = await fetch('https://localhost:7232/api/Dashboard/reorder-alerts', {
             headers: { 'Authorization': `Bearer ${token}` },
             cache: 'no-store',
         });
@@ -110,11 +110,11 @@ export async function getDashboardStats() {
     if (!token) return { monthlyRevenue: 0, lowStockItems: 0 };
      try {
         const [revenueRes, alertsRes] = await Promise.all([
-            fetch('/api/Sales/monthly-revenue', {
+            fetch('https://localhost:7232/api/Sales/monthly-revenue', {
                 headers: { 'Authorization': `Bearer ${token}` },
                 cache: 'no-store',
             }),
-            fetch('/api/Dashboard/reorder-alerts', {
+            fetch('https://localhost:7232/api/Product/reorder-alerts', {
                 headers: { 'Authorization': `Bearer ${token}` },
                 cache: 'no-store',
             })
