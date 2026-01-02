@@ -17,26 +17,24 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import {
   Bell,
   Home,
   LogOut,
-  Package,
-  Search,
   User,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Fragment, useMemo } from 'react';
-import { removeToken } from '@/lib/auth';
+import { useAuth } from '@/hooks/use-auth';
 
 const UserMenu = () => {
     const router = useRouter();
+    const { user, logout } = useAuth();
 
     const handleLogout = () => {
-      removeToken();
+      logout();
       router.push('/login');
     }
 
@@ -53,6 +51,15 @@ const UserMenu = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            {user && (
+              <>
+                <DropdownMenuSeparator />
+                <div className='px-2 py-1.5 text-sm'>
+                  <p className='font-medium'>{user.fullName}</p>
+                  <p className='text-xs text-muted-foreground'>{user.email}</p>
+                </div>
+              </>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuItem>Support</DropdownMenuItem>
@@ -120,18 +127,12 @@ export default function AppHeader() {
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
       <SidebarTrigger className="sm:hidden" />
       <AppBreadcrumb />
-      <div className="relative ml-auto flex-1 md:grow-0">
-        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          type="search"
-          placeholder="Search..."
-          className="w-full rounded-lg bg-secondary pl-8 md:w-[200px] lg:w-[320px]"
-        />
+      <div className="ml-auto flex items-center gap-2">
+        <Button variant="outline" size="icon">
+          <Bell className="h-5 w-5" />
+        </Button>
+        <UserMenu />
       </div>
-      <Button variant="outline" size="icon">
-        <Bell className="h-5 w-5" />
-      </Button>
-      <UserMenu />
     </header>
   );
 }

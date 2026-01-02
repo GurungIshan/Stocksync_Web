@@ -18,7 +18,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { LogIn, Eye, EyeOff } from 'lucide-react';
-import { saveToken } from '@/lib/auth';
+import { saveToken, getToken } from '@/lib/auth';
+import { useAuth } from '@/hooks/use-auth';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address.' }),
@@ -28,6 +29,7 @@ const formSchema = z.object({
 export function LoginForm() {
   const router = useRouter();
   const { toast } = useToast();
+  const { login } = useAuth();
   const [isLoading, setIsLoading] = React.useState(false);
   const [showPassword, setShowPassword] = React.useState(false);
 
@@ -54,11 +56,27 @@ export function LoginForm() {
       if (response.ok) {
         const data = await response.json();
         saveToken(data.token);
-        toast({
-          title: 'Login Successful',
-          description: 'Welcome!',
+
+        // Fetch user details and then login
+        const userDetailsResponse = await fetch('/api/Auth/user', {
+          headers: {
+            'Authorization': `Bearer ${data.token}`,
+          },
+          cache: 'no-store'
         });
-        router.push('/dashboard');
+
+        if (userDetailsResponse.ok) {
+          const user = await userDetailsResponse.json();
+          login(user, data.token);
+          toast({
+            title: 'Login Successful',
+            description: 'Welcome!',
+          });
+          router.push('/dashboard');
+        } else {
+            throw new Error('Failed to fetch user details.');
+        }
+
       } else {
         const errorData = await response.json().catch(() => ({ message: 'Invalid email or password. Please try again.' }));
         toast({
@@ -73,7 +91,7 @@ export function LoginForm() {
       toast({
         variant: 'destructive',
         title: 'Login Failed',
-        description: 'Could not connect to the server. Please try again later.',
+        description: error instanceof Error ? error.message : 'Could not connect to the server. Please try again later.',
       });
       setIsLoading(false);
     }
