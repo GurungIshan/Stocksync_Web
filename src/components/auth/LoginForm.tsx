@@ -18,7 +18,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { LogIn, Eye, EyeOff } from 'lucide-react';
-import { saveToken } from '@/lib/auth';
 import { useAuth } from '@/hooks/use-auth';
 
 const formSchema = z.object({
@@ -55,11 +54,8 @@ export function LoginForm() {
 
       if (response.ok) {
         const data = await response.json();
+        login(data.token);
         
-        // The login function now only needs the token.
-        // The AuthProvider will handle fetching user details.
-        login({ id: '', fullName: '', email: '' }, data.token);
-
         toast({
           title: 'Login Successful',
           description: 'Welcome!',

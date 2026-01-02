@@ -13,7 +13,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (user: User, token: string) => void;
+  login: (token: string) => void;
   logout: () => void;
   isLoading: boolean;
 }
@@ -22,24 +22,22 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setTokenState] = useState<string | null>(null);
+  const [token, setTokenState] = useState<string | null>(() => getToken());
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const initializeAuth = async () => {
-      const storedToken = getToken();
-      if (storedToken) {
+      if (token) {
         try {
           const response = await fetch('/api/Auth/user', {
             headers: {
-              'Authorization': `Bearer ${storedToken}`,
+              'Authorization': `Bearer ${token}`,
             },
             cache: 'no-store'
           });
           if (response.ok) {
             const userData = await response.json();
             setUser(userData);
-            setTokenState(storedToken);
           } else {
             // Token is invalid or expired
             logout();
@@ -55,10 +53,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  const login = (userData: User, token: string) => {
-    // Only set the token. The useEffect will trigger and fetch the user.
-    setTokenState(token);
-    saveToken(token);
+  const login = (newToken: string) => {
+    saveToken(newToken);
+    setTokenState(newToken);
   };
 
   const logout = () => {
