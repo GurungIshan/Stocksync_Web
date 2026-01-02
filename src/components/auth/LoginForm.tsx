@@ -18,7 +18,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { LogIn, Eye, EyeOff } from 'lucide-react';
-import { saveToken, getToken } from '@/lib/auth';
+import { saveToken } from '@/lib/auth';
 import { useAuth } from '@/hooks/use-auth';
 
 const formSchema = z.object({
@@ -44,7 +44,7 @@ export function LoginForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      const response = await fetch('https://localhost:7232/api/Auth/login', {
+      const response = await fetch('/api/Auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -55,27 +55,16 @@ export function LoginForm() {
 
       if (response.ok) {
         const data = await response.json();
-        saveToken(data.token);
+        
+        // The login function now only needs the token.
+        // The AuthProvider will handle fetching user details.
+        login({ id: '', fullName: '', email: '' }, data.token);
 
-        // Fetch user details and then login
-        const userDetailsResponse = await fetch('https://localhost:7232/api/Auth/user', {
-          headers: {
-            'Authorization': `Bearer ${data.token}`,
-          },
-          cache: 'no-store'
+        toast({
+          title: 'Login Successful',
+          description: 'Welcome!',
         });
-
-        if (userDetailsResponse.ok) {
-          const user = await userDetailsResponse.json();
-          login(user, data.token);
-          toast({
-            title: 'Login Successful',
-            description: 'Welcome!',
-          });
-          router.push('/dashboard');
-        } else {
-            throw new Error('Failed to fetch user details.');
-        }
+        router.push('/dashboard');
 
       } else {
         const errorData = await response.json().catch(() => ({ message: 'Invalid email or password. Please try again.' }));

@@ -52,10 +52,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
     };
     initializeAuth();
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   const login = (userData: User, token: string) => {
-    setUser(userData);
+    // Only set the token. The useEffect will trigger and fetch the user.
     setTokenState(token);
     saveToken(token);
   };
