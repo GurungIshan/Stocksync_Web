@@ -8,9 +8,9 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Package, AlertCircle, ShoppingCart, Loader2 } from 'lucide-react';
-import { getToken } from '@/lib/auth';
 import type { Product } from '@/lib/types';
 import { getDashboardStats } from '@/lib/api';
+import { getProducts } from '@/lib/api';
 
 export default function DashboardStats() {
   const [stats, setStats] = useState({ monthlyRevenue: 0, lowStockItems: 0 });
@@ -20,29 +20,15 @@ export default function DashboardStats() {
   useEffect(() => {
     async function fetchAllStats() {
       setLoading(true);
-      const token = getToken();
-      if (!token) {
-        setLoading(false);
-        return;
-      }
       try {
         // Fetch stats and products in parallel
-        const [statsData, productsResponse] = await Promise.all([
+        const [statsData, productsData] = await Promise.all([
           getDashboardStats(),
-          fetch('https://localhost:7232/api/Product', {
-            headers: { 'Authorization': `Bearer ${token}` },
-            cache: 'no-store'
-          })
+          getProducts()
         ]);
 
         setStats(statsData);
-
-        if (productsResponse.ok) {
-          const productsData = await productsResponse.json();
-          setProducts(productsData);
-        } else {
-          console.error('Failed to fetch products for stats');
-        }
+        setProducts(productsData);
 
       } catch (error) {
         console.error('Error fetching dashboard data:', error);

@@ -27,6 +27,7 @@ import type { Product } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '../ui/separator';
 import { getToken } from '@/lib/auth';
+import { getProducts } from '@/lib/api';
 
 const salesFormSchema = z.object({
   customerPhoneNumber: z.string().optional(),
@@ -51,31 +52,9 @@ export default function SalesForm() {
   const [isProductsLoading, setIsProductsLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchProducts() {
-        const token = getToken();
-        if (!token) {
-            toast({
-                variant: "destructive",
-                title: "Authentication Error",
-                description: "You must be logged in to fetch products.",
-            })
-            setIsProductsLoading(false);
-            return;
-        }
-
+    async function fetchProductsForSale() {
       try {
-        const response = await fetch('https://localhost:7232/api/Product', {
-            method: 'GET',
-            headers: {
-                'accept': '*/*',
-                'Authorization': `Bearer ${token}`
-            },
-            cache: 'no-store'
-        });
-        if (!response.ok) {
-            throw new Error('Failed to fetch products');
-        }
-        const fetchedProducts = await response.json();
+        const fetchedProducts = await getProducts();
         setProducts(fetchedProducts);
       } catch (error) {
         toast({
@@ -87,7 +66,7 @@ export default function SalesForm() {
         setIsProductsLoading(false);
       }
     }
-    fetchProducts();
+    fetchProductsForSale();
   }, [toast]);
 
 
