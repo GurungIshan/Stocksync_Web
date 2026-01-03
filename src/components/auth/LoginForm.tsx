@@ -76,7 +76,7 @@ export function LoginForm() {
       toast({
         variant: 'destructive',
         title: 'Login Failed',
-        description: error instanceof Error ? error.message : 'Could not connect to the server. Please try again later.',
+        description: 'Failed to connect to the server. Please check your network connection and try again.',
       });
       setIsLoading(false);
     }

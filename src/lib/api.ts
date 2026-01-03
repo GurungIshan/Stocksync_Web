@@ -12,7 +12,7 @@ export async function getProducts(categoryId?: string | null): Promise<Product[]
     return [];
   }
 
-  let url = 'https://localhost:7232/api/Product';
+  let url = '/api/Product';
   if (categoryId) {
       url += `?categoryId=${categoryId}`;
   }
@@ -74,7 +74,7 @@ export async function getSales(): Promise<Sale[]> {
   const token = getToken();
   if (!token) return [];
   try {
-    const res = await fetch('https://localhost:7232/api/Sale', {
+    const res = await fetch('/api/Sale', {
       headers: { 'Authorization': `Bearer ${token}` },
       cache: 'no-store',
     });
@@ -93,7 +93,7 @@ export async function getReorderAlerts(): Promise<Alert[]> {
     const token = getToken();
     if (!token) return [];
     try {
-        const res = await fetch('https://localhost:7232/api/Dashboard/reorder-alerts', {
+        const res = await fetch('/api/Dashboard/reorder-alerts', {
             headers: { 'Authorization': `Bearer ${token}` },
             cache: 'no-store',
         });
@@ -110,11 +110,11 @@ export async function getDashboardStats() {
     if (!token) return { monthlyRevenue: 0, lowStockItems: 0 };
      try {
         const [revenueRes, alertsRes] = await Promise.all([
-            fetch('https://localhost:7232/api/Sales/monthly-revenue', {
+            fetch('/api/Sales/monthly-revenue', {
                 headers: { 'Authorization': `Bearer ${token}` },
                 cache: 'no-store',
             }),
-            fetch('https://localhost:7232/api/Product/reorder-alerts', {
+            fetch('/api/Dashboard/reorder-alerts', {
                 headers: { 'Authorization': `Bearer ${token}` },
                 cache: 'no-store',
             })
@@ -123,7 +123,8 @@ export async function getDashboardStats() {
         if (!revenueRes.ok) throw new Error('Failed to fetch monthly revenue');
         if (!alertsRes.ok) throw new Error('Failed to fetch reorder alerts');
 
-        const monthlyRevenue = await revenueRes.json();
+        const revenueData = await revenueRes.json();
+        const monthlyRevenue = revenueData.monthlyRevenue;
         const lowStockItems = (await alertsRes.json()).length;
 
         return { monthlyRevenue, lowStockItems };
