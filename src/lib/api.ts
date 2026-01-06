@@ -11,7 +11,7 @@ export async function getProducts(categoryId?: string | null): Promise<Product[]
     console.log("No auth token found, skipping product fetch.");
     return [];
   }
-
+  
   let url = '/api/Product';
   if (categoryId) {
       url += `?categoryId=${categoryId}`;
@@ -51,7 +51,7 @@ export async function getCategories(): Promise<Category[]> {
     return [];
   }
   try {
-     const response = await fetch('https://localhost:7232/api/Category/Categorydropdown', {
+     const response = await fetch('/api/Category/Categorydropdown', {
         method: 'GET',
         headers: {
             'accept': '*/*',
