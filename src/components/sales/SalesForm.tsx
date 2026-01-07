@@ -204,7 +204,15 @@ export default function SalesForm() {
     )
   }
 
-  const selectedProductIds = watchedItems.map(item => item.productId);
+  const getUsedStock = (productId: number, currentIndex: number) => {
+    return watchedItems.reduce((acc, item, index) => {
+      if (item.productId === productId && index !== currentIndex) {
+        return acc + item.quantity;
+      }
+      return acc;
+    }, 0);
+  };
+
 
   return (
     <Form {...form}>
@@ -217,9 +225,8 @@ export default function SalesForm() {
             {fields.map((field, index) => {
               const selectedProductId = form.watch(`items.${index}.productId`);
               const selectedProduct = products.find(p => p.id === selectedProductId);
-              const availableProducts = products.filter(
-                p => !selectedProductIds.includes(p.id) || p.id === selectedProductId
-              );
+              const usedStock = selectedProduct ? getUsedStock(selectedProduct.id, index) : 0;
+              const availableStock = selectedProduct ? selectedProduct.stockQuantity - usedStock : 0;
 
               return (
                 <div key={field.id} className="flex flex-col sm:flex-row items-start sm:items-end gap-4 p-4 border rounded-lg">
@@ -237,11 +244,17 @@ export default function SalesForm() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {availableProducts.map((product) => (
-                              <SelectItem key={product.id} value={product.id.toString()}>
-                                {product.productName}
-                              </SelectItem>
-                            ))}
+                            {products.map((product) => {
+                                const used = getUsedStock(product.id, -1); // Check total used stock
+                                if (product.stockQuantity - used > 0 || product.id === selectedProductId) {
+                                    return (
+                                        <SelectItem key={product.id} value={product.id.toString()}>
+                                            {product.productName}
+                                        </SelectItem>
+                                    )
+                                }
+                                return null;
+                            })}
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -259,14 +272,14 @@ export default function SalesForm() {
                             type="number" 
                             placeholder="1" 
                             {...field}
-                            max={selectedProduct ? selectedProduct.stockQuantity : undefined}
+                            max={selectedProduct ? availableStock : undefined}
                             min={1}
                             onChange={(e) => {
                                 const value = e.target.valueAsNumber;
-                                if(selectedProduct && value > selectedProduct.stockQuantity) {
+                                if(selectedProduct && value > availableStock) {
                                     form.setError(`items.${index}.quantity`, {
                                         type: 'manual',
-                                        message: `Stock available: ${selectedProduct.stockQuantity}`
+                                        message: `Only ${availableStock} left in stock.`
                                     });
                                 } else if (value < 1) {
                                     form.setError(`items.${index}.quantity`, {
@@ -281,7 +294,7 @@ export default function SalesForm() {
                             }}
                            />
                         </FormControl>
-                         {selectedProduct && form.getFieldState(`items.${index}.quantity`).invalid ? null : <p className="text-xs text-muted-foreground pt-1">{selectedProduct ? `Stock available: ${selectedProduct.stockQuantity}`: ""}</p>}
+                         {selectedProduct ? <p className="text-xs text-muted-foreground pt-1">{`Stock available: ${availableStock}`}</p> : null}
                         <FormMessage />
                       </FormItem>
                     )}
