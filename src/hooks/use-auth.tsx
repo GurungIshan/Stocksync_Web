@@ -33,18 +33,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const storedToken = getToken();
       if (storedToken) {
         setTokenState(storedToken);
-        // We don't fetch user here anymore, as login flow handles it or subsequent navigation will.
       }
       setIsLoading(false);
     };
     initializeAuth();
   }, []);
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (token && !user) {
+        try {
+          const response = await fetch('https://localhost:7232/api/Auth/user', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          if (response.ok) {
+            const userData = await response.json();
+            setUser(userData);
+          } else {
+            // Token might be invalid, so log out
+            logout();
+          }
+        } catch (error) {
+          console.error('Failed to fetch user:', error);
+          logout(); // Logout on network or other errors
+        }
+      }
+    };
+    fetchUser();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   const login = async (newToken: string) => {
     saveToken(newToken);
     setTokenState(newToken);
-    // User will be set by the redirect and the main useEffect
+    // User will be fetched by the useEffect hook above
   };
 
   const logout = () => {
