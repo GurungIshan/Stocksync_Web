@@ -74,7 +74,7 @@ export async function getSales(): Promise<Sale[]> {
   const token = getToken();
   if (!token) return [];
   try {
-    const res = await fetch('https://localhost:7232/api/Sale', {
+    const res = await fetch('https://localhost:7232/api/Sales', {
       headers: { 'Authorization': `Bearer ${token}` },
       cache: 'no-store',
     });
