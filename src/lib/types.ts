@@ -7,6 +7,11 @@ export type Category = {
   isActive: boolean;
 };
 
+export type CategoryDropdownItem = {
+  id: number;
+  name: string;
+};
+
 export type Product = {
   id: number;
   productName: string;

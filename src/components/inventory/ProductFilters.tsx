@@ -11,11 +11,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { type Category } from "@/lib/types";
+import { type CategoryDropdownItem } from "@/lib/types";
 import { ListFilter } from "lucide-react";
 
 type ProductFiltersProps = {
-    categories: Category[];
+    categories: CategoryDropdownItem[];
     selectedCategory: string | null;
     onCategoryChange: (categoryId: string | null) => void;
 }

@@ -4,10 +4,10 @@ import { useState, useEffect } from "react";
 import { getCategories } from "@/lib/api";
 import ProductTable from "@/components/inventory/ProductTable";
 import ProductFilters from "@/components/inventory/ProductFilters";
-import type { Category } from "@/lib/types";
+import type { CategoryDropdownItem } from "@/lib/types";
 
 export default function ProductsPage() {
-    const [categories, setCategories] = useState<Category[]>([]);
+    const [categories, setCategories] = useState<CategoryDropdownItem[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
     useEffect(() => {

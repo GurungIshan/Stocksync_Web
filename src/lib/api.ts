@@ -1,5 +1,5 @@
 
-import type { Product, Category, Sale, Alert } from './types';
+import type { Product, Category, Sale, Alert, CategoryDropdownItem } from './types';
 import { getToken } from './auth';
 
 // Simulate API delay
@@ -44,7 +44,7 @@ export async function getProductById(id: string): Promise<any | undefined> {
    return products.find(p => p.id.toString() === id);
 }
 
-export async function getCategories(): Promise<Category[]> {
+export async function getCategories(): Promise<CategoryDropdownItem[]> {
   const token = getToken();
   if (!token) {
     console.log("No auth token found, skipping category fetch.");
