@@ -31,16 +31,20 @@ import { getProducts } from '@/lib/api';
 
 const salesFormSchema = z.object({
   customerPhoneNumber: z.string().optional(),
+  customerName: z.string().optional(),
+  email: z.string().email({ message: "Invalid email address."}).optional().or(z.literal('')),
+  address: z.string().optional(),
   paymentMethod: z.string().min(1, 'Payment method is required.'),
   items: z
     .array(
       z.object({
         productId: z.coerce.number().min(1, 'Product is required.'),
         quantity: z.coerce.number().min(1, 'Quantity must be at least 1.'),
-        pricePerUnit: z.coerce.number().optional(),
       })
     )
     .min(1, 'At least one item is required.'),
+    discount: z.coerce.number().min(0, "Discount can't be negative.").optional(),
+    tax: z.coerce.number().min(0, "Tax can't be negative.").optional(),
 });
 
 type SalesFormValues = z.infer<typeof salesFormSchema>;
@@ -74,8 +78,13 @@ export default function SalesForm() {
     resolver: zodResolver(salesFormSchema),
     defaultValues: {
       customerPhoneNumber: '',
+      customerName: '',
+      email: '',
+      address: '',
       items: [{ productId: 0, quantity: 1 }],
       paymentMethod: 'Cash',
+      discount: 0,
+      tax: 0,
     },
   });
 
@@ -88,10 +97,15 @@ export default function SalesForm() {
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'NPR', minimumFractionDigits: 0 }).format(value);
 
   const watchedItems = form.watch('items');
-  const total = watchedItems.reduce((acc, item) => {
+  const watchedDiscount = form.watch('discount') || 0;
+  const watchedTax = form.watch('tax') || 0;
+
+  const subTotal = watchedItems.reduce((acc, item) => {
     const product = products.find((p) => p.id === item.productId);
     return acc + (product ? product.pricePerUnit * item.quantity : 0);
   }, 0);
+
+  const total = subTotal - watchedDiscount + (subTotal * (watchedTax / 100));
 
 
   async function onSubmit(data: SalesFormValues) {
@@ -107,7 +121,6 @@ export default function SalesForm() {
         return;
     }
     
-    // Frontend validation before submitting
     let hasValidationError = false;
     data.items.forEach((item, index) => {
       const product = products.find(p => p.id === item.productId);
@@ -132,14 +145,21 @@ export default function SalesForm() {
       return;
     }
 
-    const itemsPayload = data.items.map(item => {
-        const product = products.find(p => p.id === item.productId);
-        return {
+    const payload = {
+        customerPhoneNumber: data.customerPhoneNumber,
+        newCustomer: {
+            customerName: data.customerName,
+            email: data.email,
+            address: data.address,
+        },
+        items: data.items.map(item => ({
             productId: item.productId,
             quantity: item.quantity,
-            pricePerUnit: product ? product.pricePerUnit : 0,
-        };
-    });
+        })),
+        discount: data.discount || 0,
+        tax: data.tax || 0,
+        paymentMethod: data.paymentMethod.toLowerCase(),
+    };
 
     try {
         const response = await fetch('https://localhost:7232/api/Sale', {
@@ -148,11 +168,7 @@ export default function SalesForm() {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({
-                customerPhoneNumber: data.customerPhoneNumber,
-                paymentMethod: data.paymentMethod,
-                items: itemsPayload,
-            })
+            body: JSON.stringify(payload)
         });
 
         if (response.ok) {
@@ -282,26 +298,110 @@ export default function SalesForm() {
               <PlusCircle className="mr-2 h-4 w-4" />
               Add Item
             </Button>
+             <Separator className="my-4" />
+             <div className="space-y-2 text-right">
+                <div className="flex justify-between">
+                    <span>Subtotal</span>
+                    <span>{formatCurrency(subTotal)}</span>
+                </div>
+                <div className="flex justify-between">
+                    <span>Discount</span>
+                    <span>- {formatCurrency(watchedDiscount)}</span>
+                </div>
+                <div className="flex justify-between">
+                    <span>Tax ({watchedTax}%)</span>
+                    <span>+ {formatCurrency(subTotal * (watchedTax / 100))}</span>
+                </div>
+                <Separator className="my-2" />
+                <div className="flex justify-between text-xl font-bold">
+                    <span>Total</span>
+                    <span>{formatCurrency(total)}</span>
+                </div>
+            </div>
           </CardContent>
         </Card>
 
         <Card>
-            <CardHeader><CardTitle>Payment & Summary</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <CardHeader><CardTitle>Customer & Order Details</CardTitle></CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                    control={form.control}
+                    name="customerName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Customer Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter customer name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 <FormField
                     control={form.control}
                     name="customerPhoneNumber"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Customer Phone (Optional)</FormLabel>
+                        <FormLabel>Customer Phone</FormLabel>
                         <FormControl>
                           <Input type="tel" placeholder="Enter phone number" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
-                  />
+                />
+                 <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input type="email" placeholder="customer@example.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                />
+                 <FormField
+                    control={form.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Address</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter address" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="discount"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Discount (Nrs.)</FormLabel>
+                        <FormControl>
+                            <Input type="number" placeholder="0" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                 <FormField
+                    control={form.control}
+                    name="tax"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Tax (%)</FormLabel>
+                        <FormControl>
+                            <Input type="number" placeholder="0" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
                 <FormField
                     control={form.control}
                     name="paymentMethod"
@@ -324,16 +424,6 @@ export default function SalesForm() {
                         </FormItem>
                     )}
                 />
-                </div>
-                 <Separator className="my-4" />
-                 <div className="space-y-2 text-right">
-                     <div className="flex justify-between text-xl font-bold">
-                        <span>Total</span>
-                        <span>{formatCurrency(total)}</span>
-                    </div>
-                 </div>
-
-
             </CardContent>
             <CardFooter>
                  <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
