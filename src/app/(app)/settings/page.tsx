@@ -9,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { useAuth } from '@/hooks/use-auth';
 import { Moon, Sun } from 'lucide-react';
 import {
   DropdownMenu,
@@ -63,35 +62,11 @@ function AppearanceSettings() {
   );
 }
 
-function AccountSettings() {
-    const { user } = useAuth();
-    
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Account Information</CardTitle>
-                <CardDescription>Your personal and login details.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">Full Name</p>
-                    <p>{user?.fullName || 'N/A'}</p>
-                </div>
-                 <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">Email Address</p>
-                    <p>{user?.email || 'N/A'}</p>
-                </div>
-            </CardContent>
-        </Card>
-    )
-}
-
 export default function SettingsPage() {
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-3xl font-bold font-headline">Settings</h1>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <AccountSettings />
         <AppearanceSettings />
       </div>
     </div>

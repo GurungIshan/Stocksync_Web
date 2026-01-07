@@ -3,16 +3,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { getToken, saveToken, removeToken } from '@/lib/auth';
 import { Loader2 } from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation';
-
-interface User {
-  id: string;
-  fullName: string;
-  email: string;
-}
 
 interface AuthContextType {
-  user: User | null;
   token: string | null;
   login: (token: string) => Promise<void>;
   logout: () => void;
@@ -22,14 +14,11 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
   const [token, setTokenState] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
-  const pathname = usePathname();
 
   useEffect(() => {
-    const initializeAuth = async () => {
+    const initializeAuth = () => {
       const storedToken = getToken();
       if (storedToken) {
         setTokenState(storedToken);
@@ -39,40 +28,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initializeAuth();
   }, []);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      if (token && !user) {
-        try {
-          const response = await fetch('https://localhost:7232/api/Auth/user', {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          if (response.ok) {
-            const userData = await response.json();
-            setUser(userData);
-          } else {
-            // Token might be invalid, so log out
-            logout();
-          }
-        } catch (error) {
-          console.error('Failed to fetch user:', error);
-          logout(); // Logout on network or other errors
-        }
-      }
-    };
-    fetchUser();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
 
   const login = async (newToken: string) => {
     saveToken(newToken);
     setTokenState(newToken);
-    // User will be fetched by the useEffect hook above
   };
 
   const logout = () => {
-    setUser(null);
     setTokenState(null);
     removeToken();
   };
@@ -86,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ token, login, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
