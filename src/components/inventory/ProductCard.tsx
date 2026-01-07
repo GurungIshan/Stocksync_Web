@@ -24,6 +24,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           alt={product.productName}
           fill
           className="object-cover"
+          data-ai-hint="product image"
         />
       </div>
       <CardContent className="p-4">
