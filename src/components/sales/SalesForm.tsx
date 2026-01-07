@@ -267,11 +267,20 @@ export default function SalesForm() {
                         <FormControl>
                            <Input 
                             type="number" 
-                            placeholder="1" 
+                            placeholder="Enter quantity" 
                             {...field}
-                            max={selectedProduct ? availableStock : undefined}
-                            min={1}
-                            onChange={(e) => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
+                            onChange={(e) => {
+                              const value = e.target.value === '' ? 0 : Number(e.target.value);
+                              field.onChange(value);
+                              if (value > availableStock) {
+                                form.setError(`items.${index}.quantity`, {
+                                  type: 'manual',
+                                  message: `Cannot exceed available stock of ${availableStock}.`
+                                });
+                              } else {
+                                form.clearErrors(`items.${index}.quantity`);
+                              }
+                            }}
                            />
                         </FormControl>
                          {selectedProduct ? <p className="text-xs text-muted-foreground pt-1">{`Stock available: ${availableStock}`}</p> : null}
