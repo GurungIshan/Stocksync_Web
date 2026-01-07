@@ -84,8 +84,8 @@ export default function ProductTable({ selectedCategory }: ProductTableProps) {
                                         <TableCell>{formatCurrency(product.pricePerUnit)}</TableCell>
                                         <TableCell>{product.stockQuantity}</TableCell>
                                         <TableCell>
-                                            <Badge variant={product.stockQuantity > product.reoredLevel ? 'secondary' : 'destructive'}>
-                                                {product.stockQuantity > product.reoredLevel ? 'In Stock' : 'Low Stock'}
+                                            <Badge variant={product.stockQuantity > product.reorderLevel ? 'secondary' : 'destructive'}>
+                                                {product.stockQuantity > product.reorderLevel ? 'In Stock' : 'Low Stock'}
                                             </Badge>
                                         </TableCell>
                                         <TableCell>

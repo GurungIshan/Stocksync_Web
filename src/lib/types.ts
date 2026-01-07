@@ -14,7 +14,7 @@ export type Product = {
   sku: string;
   pricePerUnit: number;
   stockQuantity: number;
-  reoredLevel: number;
+  reorderLevel: number;
   categoryId: number;
   supplierId: number;
   isActive: boolean;
