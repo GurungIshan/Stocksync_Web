@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { getToken, saveToken, removeToken } from '@/lib/auth';
 import { Loader2 } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
 
 interface User {
   id: string;
@@ -13,7 +14,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (token: string) => void;
+  login: (token: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -24,57 +25,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setTokenState] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const initializeAuth = async () => {
       const storedToken = getToken();
       if (storedToken) {
         setTokenState(storedToken);
-        try {
-          const response = await fetch('https://localhost:7232/api/Auth/user', {
-            headers: {
-              'Authorization': `Bearer ${storedToken}`,
-            },
-            cache: 'no-store'
-          });
-          if (response.ok) {
-            const userData = await response.json();
-            setUser(userData);
-          } else {
-            logout();
-          }
-        } catch (error) {
-          console.error("Failed to fetch user on mount", error);
-          logout();
-        }
+        // We don't fetch user here anymore, as login flow handles it or subsequent navigation will.
       }
       setIsLoading(false);
     };
     initializeAuth();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+
   const login = async (newToken: string) => {
-    setIsLoading(true);
     saveToken(newToken);
     setTokenState(newToken);
-     try {
-      const userDetailsResponse = await fetch('https://localhost:7232/api/Auth/user', {
-        headers: { 'Authorization': `Bearer ${newToken}` },
-        cache: 'no-store'
-      });
-      if (userDetailsResponse.ok) {
-        const userData = await userDetailsResponse.json();
-        setUser(userData);
-      } else {
-        throw new Error('Failed to fetch user details');
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      logout(); // Clear auth state on error
-    } finally {
-      setIsLoading(false);
-    }
+    // User will be set by the redirect and the main useEffect
   };
 
   const logout = () => {
@@ -92,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isLoading: isLoading && !user }}>
+    <AuthContext.Provider value={{ user, token, login, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
