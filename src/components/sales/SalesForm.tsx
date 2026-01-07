@@ -162,7 +162,7 @@ export default function SalesForm() {
     };
 
     try {
-        const response = await fetch('https://localhost:7232/api/Sale', {
+        const response = await fetch('https://localhost:7232/api/Sales', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
