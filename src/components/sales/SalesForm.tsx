@@ -227,6 +227,7 @@ export default function SalesForm() {
               const selectedProduct = products.find(p => p.id === selectedProductId);
               const usedStock = selectedProduct ? getUsedStock(selectedProduct.id, index) : 0;
               const availableStock = selectedProduct ? selectedProduct.stockQuantity - usedStock : 0;
+              const alreadySelectedProductIds = watchedItems.map(item => item.productId).filter(id => id !== selectedProductId);
 
               return (
                 <div key={field.id} className="flex flex-col sm:flex-row items-start sm:items-end gap-4 p-4 border rounded-lg">
@@ -244,7 +245,7 @@ export default function SalesForm() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {products.map((product) => {
+                            {products.filter(p => !alreadySelectedProductIds.includes(p.id) || p.id === selectedProductId).map((product) => {
                                 const used = getUsedStock(product.id, -1); // Check total used stock
                                 if (product.stockQuantity - used > 0 || product.id === selectedProductId) {
                                     return (
@@ -276,6 +277,11 @@ export default function SalesForm() {
                             min={1}
                             onChange={(e) => {
                                 const value = e.target.valueAsNumber;
+                                if (isNaN(value)) {
+                                  field.onChange(1);
+                                  return;
+                                }
+
                                 if(selectedProduct && value > availableStock) {
                                     form.setError(`items.${index}.quantity`, {
                                         type: 'manual',
