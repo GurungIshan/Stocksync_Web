@@ -22,16 +22,18 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setTokenState] = useState<string | null>(() => getToken());
+  const [token, setTokenState] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const initializeAuth = async () => {
-      if (token) {
+      const storedToken = getToken();
+      if (storedToken) {
+        setTokenState(storedToken);
         try {
           const response = await fetch('https://localhost:7232/api/Auth/user', {
             headers: {
-              'Authorization': `Bearer ${token}`,
+              'Authorization': `Bearer ${storedToken}`,
             },
             cache: 'no-store'
           });
@@ -39,7 +41,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const userData = await response.json();
             setUser(userData);
           } else {
-            // Token is invalid or expired
             logout();
           }
         } catch (error) {
@@ -51,11 +52,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
     initializeAuth();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, []);
 
-  const login = (newToken: string) => {
+  const login = async (newToken: string) => {
+    setIsLoading(true);
     saveToken(newToken);
     setTokenState(newToken);
+     try {
+      const userDetailsResponse = await fetch('https://localhost:7232/api/Auth/user', {
+        headers: { 'Authorization': `Bearer ${newToken}` },
+        cache: 'no-store'
+      });
+      if (userDetailsResponse.ok) {
+        const userData = await userDetailsResponse.json();
+        setUser(userData);
+      } else {
+        throw new Error('Failed to fetch user details');
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      logout(); // Clear auth state on error
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const logout = () => {
@@ -73,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, token, login, logout, isLoading: isLoading && !user }}>
       {children}
     </AuthContext.Provider>
   );

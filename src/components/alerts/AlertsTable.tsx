@@ -49,8 +49,7 @@ export default function AlertsTable({ alerts }: AlertsTableProps) {
                                 <TableCell className="text-center">{alert.reorderPoint}</TableCell>
                                 <TableCell className="text-center">{alert.leadTimeDays}</TableCell>
                                 <TableCell className="text-right">
-                                    {/* The ReorderSuggestion component might need adjustments if its props depend on the old Alert type */}
-                                    {/* <ReorderSuggestion alert={alert} /> */}
+                                    <ReorderSuggestion alert={alert} />
                                 </TableCell>
                             </TableRow>
                         ))}

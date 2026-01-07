@@ -54,7 +54,7 @@ export function LoginForm() {
 
       if (response.ok) {
         const data = await response.json();
-        login(data.token);
+        await login(data.token);
         
         toast({
           title: 'Login Successful',
