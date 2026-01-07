@@ -162,7 +162,7 @@ export default function SalesForm() {
     };
 
     try {
-        const response = await fetch('https://localhost:7232/api/Sales', {
+        const response = await fetch('https://localhost:7232/api/Sale', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -204,6 +204,8 @@ export default function SalesForm() {
     )
   }
 
+  const selectedProductIds = watchedItems.map(item => item.productId);
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -215,6 +217,9 @@ export default function SalesForm() {
             {fields.map((field, index) => {
               const selectedProductId = form.watch(`items.${index}.productId`);
               const selectedProduct = products.find(p => p.id === selectedProductId);
+              const availableProducts = products.filter(
+                p => !selectedProductIds.includes(p.id) || p.id === selectedProductId
+              );
 
               return (
                 <div key={field.id} className="flex flex-col sm:flex-row items-start sm:items-end gap-4 p-4 border rounded-lg">
@@ -232,7 +237,7 @@ export default function SalesForm() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {products.map((product) => (
+                            {availableProducts.map((product) => (
                               <SelectItem key={product.id} value={product.id.toString()}>
                                 {product.productName}
                               </SelectItem>
