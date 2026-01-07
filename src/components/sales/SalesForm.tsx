@@ -227,7 +227,7 @@ export default function SalesForm() {
               const selectedProduct = products.find(p => p.id === selectedProductId);
               const usedStock = selectedProduct ? getUsedStock(selectedProduct.id, index) : 0;
               const availableStock = selectedProduct ? selectedProduct.stockQuantity - usedStock : 0;
-              const alreadySelectedProductIds = watchedItems.map(item => item.productId).filter(id => id !== selectedProductId);
+              const alreadySelectedProductIds = watchedItems.map((item, i) => i !== index ? item.productId : -1);
 
               return (
                 <div key={field.id} className="flex flex-col sm:flex-row items-start sm:items-end gap-4 p-4 border rounded-lg">
@@ -275,29 +275,7 @@ export default function SalesForm() {
                             {...field}
                             max={selectedProduct ? availableStock : undefined}
                             min={1}
-                            onChange={(e) => {
-                                const value = e.target.valueAsNumber;
-                                if (isNaN(value)) {
-                                  field.onChange(1);
-                                  return;
-                                }
-
-                                if(selectedProduct && value > availableStock) {
-                                    form.setError(`items.${index}.quantity`, {
-                                        type: 'manual',
-                                        message: `Only ${availableStock} left in stock.`
-                                    });
-                                } else if (value < 1) {
-                                    form.setError(`items.${index}.quantity`, {
-                                        type: 'manual',
-                                        message: 'Quantity must be at least 1.'
-                                    });
-                                }
-                                else {
-                                    form.clearErrors(`items.${index}.quantity`);
-                                }
-                                field.onChange(value);
-                            }}
+                            onChange={(e) => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
                            />
                         </FormControl>
                          {selectedProduct ? <p className="text-xs text-muted-foreground pt-1">{`Stock available: ${availableStock}`}</p> : null}
