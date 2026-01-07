@@ -124,17 +124,13 @@ export default function SalesForm() {
     let hasValidationError = false;
     data.items.forEach((item, index) => {
       const product = products.find(p => p.id === item.productId);
-      if (product && item.quantity > product.stockQuantity) {
+      const usedStock = getUsedStock(item.productId, index);
+      const availableStock = product ? product.stockQuantity - usedStock : 0;
+      
+      if (item.quantity > availableStock) {
         form.setError(`items.${index}.quantity`, {
           type: "manual",
-          message: `Cannot exceed available stock of ${product.stockQuantity}.`
-        });
-        hasValidationError = true;
-      }
-      if (item.quantity < 1) {
-        form.setError(`items.${index}.quantity`, {
-          type: "manual",
-          message: "Quantity must be at least 1."
+          message: `Cannot exceed available stock of ${availableStock}.`
         });
         hasValidationError = true;
       }
@@ -207,7 +203,7 @@ export default function SalesForm() {
   const getUsedStock = (productId: number, currentIndex: number) => {
     return watchedItems.reduce((acc, item, index) => {
       if (item.productId === productId && index !== currentIndex) {
-        return acc + item.quantity;
+        return acc + (Number(item.quantity) || 0);
       }
       return acc;
     }, 0);
@@ -246,7 +242,7 @@ export default function SalesForm() {
                           </FormControl>
                           <SelectContent>
                             {products.filter(p => !alreadySelectedProductIds.includes(p.id) || p.id === selectedProductId).map((product) => {
-                                const used = getUsedStock(product.id, -1); // Check total used stock
+                                const used = getUsedStock(product.id, -1);
                                 if (product.stockQuantity - used > 0 || product.id === selectedProductId) {
                                     return (
                                         <SelectItem key={product.id} value={product.id.toString()}>
