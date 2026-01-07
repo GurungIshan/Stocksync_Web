@@ -29,27 +29,29 @@ export type Product = {
 };
 
 export type Sale = {
-  id: string;
-  items: {
-    productId: string;
-    productName: string;
-    quantity: number;
-    price: number;
-  }[];
-  total: number;
-  createdAt: Date;
+  saleId: number;
+  invoiceNo: string;
+  saleDate: string;
+  customerName: string | null;
+  customerPhone: string | null;
+  totalAmount: number;
+  paymentMethod: string;
+  status: string;
+  itemCount: number;
 };
 
 export type Alert = {
-  id: string;
-  productId: string;
+  productId: number;
   productName: string;
   currentStock: number;
   reorderPoint: number;
+  averageDailySales: number;
+  leadTimeDays: number;
+  safetyStock: number;
   suggestedOrderQty: number;
-  daysUntilStockout: number;
-  urgency: 'Critical' | 'Warning' | 'Normal';
+  urgencyLevel: 'HIGH' | 'MEDIUM' | 'LOW';
 };
+
 
 export type CartItem = {
   product: Product;

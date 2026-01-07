@@ -1,3 +1,4 @@
+
 'use client';
 import { useState } from 'react';
 import {
@@ -30,6 +31,7 @@ export default function ReorderSuggestion({ alert }: ReorderSuggestionProps) {
     setError(null);
     setSuggestion(null);
 
+    // This is mock data and should be replaced with real historical data fetching
     const historicalDemand = [
       { date: '2023-01-10', quantity: Math.floor(Math.random() * 5) + 1 },
       { date: '2023-02-15', quantity: Math.floor(Math.random() * 5) + 2 },
@@ -38,12 +40,12 @@ export default function ReorderSuggestion({ alert }: ReorderSuggestionProps) {
 
     try {
       const result = await getReorderSuggestion({
-        productId: alert.productId,
+        productId: alert.productId.toString(),
         productName: alert.productName,
         currentStock: alert.currentStock,
         reorderPoint: alert.reorderPoint,
         historicalDemand,
-        leadTimeDays: 14,
+        leadTimeDays: alert.leadTimeDays,
       });
       setSuggestion(result);
     } catch (e) {

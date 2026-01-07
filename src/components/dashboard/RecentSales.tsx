@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { Sale } from '@/lib/types';
@@ -54,6 +55,7 @@ export default function RecentSales() {
             <TableHeader>
               <TableRow>
                 <TableHead>Customer</TableHead>
+                <TableHead>Invoice No.</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
               </TableRow>
@@ -61,20 +63,21 @@ export default function RecentSales() {
             <TableBody>
               {sales.length > 0 ? (
                 sales.slice(0, 5).map((sale) => (
-                  <TableRow key={sale.id}>
+                  <TableRow key={sale.saleId}>
                     <TableCell>
-                      <div className="font-medium">Walk-in Customer</div>
+                      <div className="font-medium">{sale.customerName || 'Walk-in Customer'}</div>
                       <div className="hidden text-sm text-muted-foreground md:inline">
-                        {sale.items.map(i => i.productName).join(', ')}
+                        {sale.customerPhone}
                       </div>
                     </TableCell>
-                    <TableCell>{format(new Date(sale.createdAt), 'PPpp')}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(sale.total)}</TableCell>
+                    <TableCell>{sale.invoiceNo}</TableCell>
+                    <TableCell>{format(new Date(sale.saleDate), 'PP')}</TableCell>
+                    <TableCell className="text-right">{formatCurrency(sale.totalAmount)}</TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={3} className="h-24 text-center">
+                  <TableCell colSpan={4} className="h-24 text-center">
                     No recent sales found.
                   </TableCell>
                 </TableRow>

@@ -1,5 +1,5 @@
 
-import type { Product, Category, Sale, Alert, CategoryDropdownItem } from './types';
+import type { Product, Sale, Alert, CategoryDropdownItem } from './types';
 import { getToken } from './auth';
 
 // Simulate API delay
@@ -80,9 +80,8 @@ export async function getSales(): Promise<Sale[]> {
     });
     if (!res.ok) throw new Error('Failed to fetch sales');
     const sales = await res.json();
-    // Assuming the API returns dates as strings
-    return sales.map((s: any) => ({ ...s, createdAt: new Date(s.createdAt) }))
-                .sort((a: Sale, b: Sale) => b.createdAt.getTime() - a.createdAt.getTime());
+    // Assuming the API returns dates as strings and we want to sort by date
+    return sales.sort((a: Sale, b: Sale) => new Date(b.saleDate).getTime() - new Date(a.saleDate).getTime());
   } catch (error) {
     console.error(error);
     return [];
@@ -98,7 +97,8 @@ export async function getReorderAlerts(): Promise<Alert[]> {
             cache: 'no-store',
         });
         if (!res.ok) throw new Error('Failed to fetch alerts');
-        return await res.json();
+        const data = await res.json();
+        return data.alerts || [];
     } catch (error) {
         console.error(error);
         return [];
@@ -125,7 +125,8 @@ export async function getDashboardStats() {
 
         const revenueData = await revenueRes.json();
         const monthlyRevenue = revenueData.monthlyRevenue;
-        const lowStockItems = (await alertsRes.json()).length;
+        const alertsData = await alertsRes.json();
+        const lowStockItems = alertsData.totalAlerts || 0;
 
         return { monthlyRevenue, lowStockItems };
     } catch (error) {

@@ -1,3 +1,4 @@
+
 import type { Alert } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -9,10 +10,10 @@ type AlertsTableProps = {
 }
 
 export default function AlertsTable({ alerts }: AlertsTableProps) {
-    const getUrgencyBadge = (urgency: Alert['urgency']) => {
+    const getUrgencyBadge = (urgency: Alert['urgencyLevel']) => {
         switch (urgency) {
-            case 'Critical': return 'destructive';
-            case 'Warning': return 'default';
+            case 'HIGH': return 'destructive';
+            case 'MEDIUM': return 'default';
             default: return 'secondary';
         }
     };
@@ -33,22 +34,23 @@ export default function AlertsTable({ alerts }: AlertsTableProps) {
                             <TableHead>Urgency</TableHead>
                             <TableHead className="text-center">Current Stock</TableHead>
                             <TableHead className="text-center">Reorder Point</TableHead>
-                            <TableHead className="text-center">Days Until Stockout</TableHead>
+                            <TableHead className="text-center">Lead Time (Days)</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {alerts.map((alert) => (
-                            <TableRow key={alert.id}>
+                            <TableRow key={alert.productId}>
                                 <TableCell className="font-medium">{alert.productName}</TableCell>
                                 <TableCell>
-                                    <Badge variant={getUrgencyBadge(alert.urgency)}>{alert.urgency}</Badge>
+                                    <Badge variant={getUrgencyBadge(alert.urgencyLevel)}>{alert.urgencyLevel}</Badge>
                                 </TableCell>
                                 <TableCell className="text-center">{alert.currentStock}</TableCell>
                                 <TableCell className="text-center">{alert.reorderPoint}</TableCell>
-                                <TableCell className="text-center">{alert.daysUntilStockout}</TableCell>
+                                <TableCell className="text-center">{alert.leadTimeDays}</TableCell>
                                 <TableCell className="text-right">
-                                    <ReorderSuggestion alert={alert} />
+                                    {/* The ReorderSuggestion component might need adjustments if its props depend on the old Alert type */}
+                                    {/* <ReorderSuggestion alert={alert} /> */}
                                 </TableCell>
                             </TableRow>
                         ))}
