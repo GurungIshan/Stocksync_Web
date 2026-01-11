@@ -114,7 +114,7 @@ export async function getDashboardStats() {
                 headers: { 'Authorization': `Bearer ${token}` },
                 cache: 'no-store',
             }),
-            fetch('https://localhost:7232/api/Product/reorder-alerts', {
+            fetch('https://localhost:7232/api/Sales/reorder-alerts', {
                 headers: { 'Authorization': `Bearer ${token}` },
                 cache: 'no-store',
             })
