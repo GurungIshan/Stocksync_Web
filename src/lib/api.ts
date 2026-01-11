@@ -110,7 +110,7 @@ export async function getDashboardStats() {
     if (!token) return { monthlyRevenue: 0, lowStockItems: 0 };
      try {
         const [revenueRes, alertsRes] = await Promise.all([
-            fetch('https://localhost:7232/api/Sale/monthly-revenue', {
+            fetch('https://localhost:7232/api/Sales/monthly-revenue', {
                 headers: { 'Authorization': `Bearer ${token}` },
                 cache: 'no-store',
             }),
@@ -125,6 +125,7 @@ export async function getDashboardStats() {
 
         const revenueData = await revenueRes.json();
         const monthlyRevenue = revenueData.monthlyRevenue;
+        
         const alertsData = await alertsRes.json();
         const lowStockItems = alertsData.totalAlerts || 0;
 

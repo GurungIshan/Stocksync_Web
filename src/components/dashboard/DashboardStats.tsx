@@ -39,8 +39,12 @@ export default function DashboardStats() {
     fetchAllStats();
   }, []);
 
-  const formatCurrency = (value: number) =>
-    `Nrs. ${new Intl.NumberFormat('en-IN').format(value)}`;
+  const formatCurrency = (value: number) => {
+    if (typeof value !== 'number' || isNaN(value)) {
+      return `Nrs. 0`;
+    }
+    return `Nrs. ${new Intl.NumberFormat('en-IN').format(value)}`;
+  }
 
   const totalProducts = products.length;
   const inventoryValue = products.reduce((sum, p) => sum + p.pricePerUnit * p.stockQuantity, 0);
@@ -81,7 +85,7 @@ export default function DashboardStats() {
             {card.icon}
           </CardHeader>
           <CardContent>
-            {card.loading && card.value === 0 || (card.loading && typeof card.value === 'string' && card.value.includes('0')) ? (
+            {card.loading ? (
                  <div className="flex justify-start items-center h-8">
                     <Loader2 className="h-6 w-6 animate-spin text-primary" />
                  </div>
