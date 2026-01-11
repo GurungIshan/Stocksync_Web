@@ -6,11 +6,10 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarFooter
 } from '@/components/ui/sidebar';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { navLinks, settingsLink } from '@/lib/nav-links';
+import { navLinks } from '@/lib/nav-links';
 import { Package } from 'lucide-react';
 
 export default function AppSidebar() {
@@ -45,18 +44,6 @@ export default function AppSidebar() {
           ))}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter>
-        <SidebarMenu>
-            <SidebarMenuItem>
-                <Link href={settingsLink.href}>
-                    <SidebarMenuButton isActive={pathname.startsWith(settingsLink.href)} tooltip={settingsLink.label}>
-                        <settingsLink.icon />
-                        <span>{settingsLink.label}</span>
-                    </SidebarMenuButton>
-                </Link>
-            </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
     </>
   );
 }

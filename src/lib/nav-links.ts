@@ -22,9 +22,3 @@ export const navLinks = [
     icon: AlertTriangle,
   },
 ];
-
-export const settingsLink = {
-    href: '/settings',
-    label: 'Settings',
-    icon: Settings
-}
