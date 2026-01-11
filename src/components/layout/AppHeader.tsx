@@ -21,6 +21,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
   DropdownMenuPortal,
+  DropdownMenuGroup,
 } from '@/components/ui/dropdown-menu';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import {
@@ -31,12 +32,15 @@ import {
   Moon,
   Sun,
   Laptop,
+  AlertTriangle,
+  FileText
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Fragment, useMemo } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { useTheme } from 'next-themes';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../ui/card';
 
 const UserMenu = () => {
     const router = useRouter();
@@ -93,28 +97,54 @@ const UserMenu = () => {
 }
 
 const NotificationMenu = () => {
+    const notificationCount = 2; // Demo count
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                 <Button variant="outline" size="icon">
+                <Button variant="outline" size="icon" className="relative">
                     <Bell className="h-5 w-5" />
+                    {notificationCount > 0 && (
+                         <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                            {notificationCount}
+                        </span>
+                    )}
                     <span className="sr-only">Toggle notifications</span>
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className="w-80">
+                <DropdownMenuLabel className="font-bold">Notifications</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                    <div className="flex flex-col">
-                        <span className="font-medium">3 items low on stock</span>
-                        <span className="text-xs text-muted-foreground">Please check the reorder alerts page.</span>
-                    </div>
-                </DropdownMenuItem>
-                 <DropdownMenuItem>
-                    <div className="flex flex-col">
-                        <span className="font-medium">New Monthly Report</span>
-                        <span className="text-xs text-muted-foreground">Your monthly sales report is ready.</span>
-                    </div>
+                <DropdownMenuGroup className='max-h-80 overflow-y-auto'>
+                    <DropdownMenuItem className="flex items-start gap-3">
+                        <AlertTriangle className="h-5 w-5 mt-1 text-yellow-500" />
+                        <div className="grid gap-1">
+                            <p className="font-semibold">Low Stock Alert</p>
+                            <p className="text-sm text-muted-foreground">
+                                3 items are running low on stock. Please check reorder alerts.
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                                15 minutes ago
+                            </p>
+                        </div>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="flex items-start gap-3">
+                        <FileText className="h-5 w-5 mt-1 text-blue-500" />
+                        <div className="grid gap-1">
+                            <p className="font-semibold">New Monthly Report</p>
+                            <p className="text-sm text-muted-foreground">
+                                Your monthly sales report for June is ready for download.
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                                2 hours ago
+                            </p>
+                        </div>
+                    </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="justify-center">
+                    <Button variant="ghost" size="sm">Mark all as read</Button>
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
