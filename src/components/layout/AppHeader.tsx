@@ -40,7 +40,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Fragment, useMemo } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { useTheme } from 'next-themes';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../ui/card';
 
 const UserMenu = () => {
     const router = useRouter();
@@ -206,7 +205,7 @@ const AppBreadcrumb = () => {
 
 export default function AppHeader() {
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+    <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:px-6">
       <SidebarTrigger className="sm:hidden" />
       <AppBreadcrumb />
       <div className="ml-auto flex items-center gap-2">
