@@ -115,7 +115,7 @@ const NotificationMenu = () => {
                 <DropdownMenuLabel className="font-bold">Notifications</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup className='max-h-80 overflow-y-auto'>
-                    <DropdownMenuItem className="flex items-start gap-3">
+                    <DropdownMenuItem className="flex items-start gap-3 hover:bg-transparent focus:bg-transparent">
                         <AlertTriangle className="h-5 w-5 mt-1 text-yellow-500" />
                         <div className="grid gap-1">
                             <p className="font-semibold">Low Stock Alert</p>
@@ -128,7 +128,7 @@ const NotificationMenu = () => {
                         </div>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="flex items-start gap-3">
+                    <DropdownMenuItem className="flex items-start gap-3 hover:bg-transparent focus:bg-transparent">
                         <FileText className="h-5 w-5 mt-1 text-blue-500" />
                         <div className="grid gap-1">
                             <p className="font-semibold">New Monthly Report</p>
