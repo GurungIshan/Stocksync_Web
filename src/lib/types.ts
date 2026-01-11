@@ -12,6 +12,11 @@ export type CategoryDropdownItem = {
   name: string;
 };
 
+export type ProductDropdownItem = {
+  id: number;
+  name: string;
+};
+
 export type Product = {
   id: number;
   productName: string;

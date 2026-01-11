@@ -23,11 +23,11 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { PlusCircle, Trash2, Loader2 } from 'lucide-react';
-import type { Product } from '@/lib/types';
+import type { Product, ProductDropdownItem } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '../ui/separator';
 import { getToken } from '@/lib/auth';
-import { getProducts } from '@/lib/api';
+import { getProducts, getProductsForDropdown } from '@/lib/api';
 
 const salesFormSchema = z.object({
   customerPhoneNumber: z.string().optional(),
@@ -53,13 +53,18 @@ export default function SalesForm() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
+  const [productDropdown, setProductDropdown] = useState<ProductDropdownItem[]>([]);
   const [isProductsLoading, setIsProductsLoading] = useState(true);
 
   useEffect(() => {
     async function fetchProductsForSale() {
       try {
-        const fetchedProducts = await getProducts();
+        const [fetchedProducts, fetchedProductDropdown] = await Promise.all([
+          getProducts(),
+          getProductsForDropdown()
+        ]);
         setProducts(fetchedProducts);
+        setProductDropdown(fetchedProductDropdown);
       } catch (error) {
         toast({
             variant: "destructive",
@@ -241,12 +246,13 @@ export default function SalesForm() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {products.filter(p => !alreadySelectedProductIds.includes(p.id) || p.id === selectedProductId).map((product) => {
-                                const used = getUsedStock(product.id, -1);
-                                if (product.stockQuantity - used > 0 || product.id === selectedProductId) {
+                            {productDropdown.filter(p => !alreadySelectedProductIds.includes(p.id) || p.id === selectedProductId).map((product) => {
+                                const fullProduct = products.find(fp => fp.id === product.id);
+                                const used = fullProduct ? getUsedStock(fullProduct.id, -1) : 0;
+                                if ((fullProduct && fullProduct.stockQuantity - used > 0) || product.id === selectedProductId) {
                                     return (
                                         <SelectItem key={product.id} value={product.id.toString()}>
-                                            {product.productName}
+                                            {product.name}
                                         </SelectItem>
                                     )
                                 }

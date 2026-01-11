@@ -1,5 +1,5 @@
 
-import type { Product, Sale, Alert, CategoryDropdownItem } from './types';
+import type { Product, Sale, Alert, CategoryDropdownItem, ProductDropdownItem } from './types';
 import { getToken } from './auth';
 
 // Simulate API delay
@@ -35,6 +35,32 @@ export async function getProducts(categoryId?: string | null): Promise<Product[]
   } catch (error) {
     console.error('Failed to fetch products:', error);
     return []; // Return empty array on error
+  }
+}
+
+export async function getProductsForDropdown(): Promise<ProductDropdownItem[]> {
+  const token = getToken();
+  if (!token) {
+    console.log("No auth token found, skipping product dropdown fetch.");
+    return [];
+  }
+  try {
+     const response = await fetch('https://localhost:7232/api/Product/Productdropdown', {
+        method: 'GET',
+        headers: {
+            'accept': '*/*',
+            'Authorization': `Bearer ${token}`
+        },
+        cache: 'no-store'
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch(e) {
+    console.error('Failed to fetch product dropdown:', e);
+    return [];
   }
 }
 
