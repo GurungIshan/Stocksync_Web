@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -91,6 +92,36 @@ const UserMenu = () => {
     )
 }
 
+const NotificationMenu = () => {
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                 <Button variant="outline" size="icon">
+                    <Bell className="h-5 w-5" />
+                    <span className="sr-only">Toggle notifications</span>
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                    <div className="flex flex-col">
+                        <span className="font-medium">3 items low on stock</span>
+                        <span className="text-xs text-muted-foreground">Please check the reorder alerts page.</span>
+                    </div>
+                </DropdownMenuItem>
+                 <DropdownMenuItem>
+                    <div className="flex flex-col">
+                        <span className="font-medium">New Monthly Report</span>
+                        <span className="text-xs text-muted-foreground">Your monthly sales report is ready.</span>
+                    </div>
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    )
+}
+
+
 const AppBreadcrumb = () => {
   const pathname = usePathname();
   const segments = useMemo(() => pathname.split('/').filter(Boolean), [pathname]);
@@ -149,9 +180,7 @@ export default function AppHeader() {
       <SidebarTrigger className="sm:hidden" />
       <AppBreadcrumb />
       <div className="ml-auto flex items-center gap-2">
-        <Button variant="outline" size="icon">
-          <Bell className="h-5 w-5" />
-        </Button>
+        <NotificationMenu />
         <UserMenu />
       </div>
     </header>
