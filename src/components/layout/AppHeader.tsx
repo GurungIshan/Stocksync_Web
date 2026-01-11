@@ -31,7 +31,7 @@ import { useAuth } from '@/hooks/use-auth';
 
 const UserMenu = () => {
     const router = useRouter();
-    const { logout } = useAuth();
+    const { logout, user } = useAuth();
 
     const handleLogout = () => {
       logout();
@@ -50,10 +50,7 @@ const UserMenu = () => {
             </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Settings</DropdownMenuItem>
-            <DropdownMenuItem>Support</DropdownMenuItem>
+            <DropdownMenuLabel>{user?.fullName || 'My Account'}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}><LogOut className="mr-2 h-4 w-4"/>Logout</DropdownMenuItem>
             </DropdownMenuContent>
