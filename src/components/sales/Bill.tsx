@@ -42,7 +42,7 @@ export default function Bill({ sale, isOpen, onClose }: BillProps) {
   const discount = sale.discount || 0;
   const taxPercent = sale.tax || 0;
   const taxAmount = (subTotal - discount) * (taxPercent / 100);
-  const totalAmount = sale.totalAmount || 0;
+  const totalAmount = subTotal - discount + taxAmount;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
