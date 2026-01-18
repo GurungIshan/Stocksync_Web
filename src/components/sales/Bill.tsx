@@ -8,13 +8,14 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import type { DetailedSale } from '@/lib/types';
 import { format, parseISO } from 'date-fns';
 import { Separator } from '@/components/ui/separator';
 import { useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { Printer } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 type BillProps = {
   sale: DetailedSale | null;
@@ -66,7 +67,7 @@ export default function Bill({ sale, isOpen, onClose }: BillProps) {
               {sale.saleDate && <p><strong>Date:</strong> {format(parseISO(sale.saleDate), 'PPP p')}</p>}
             </div>
             <div className="text-right">
-                <p><strong>Cashier:</strong> {sale.user?.fullName}</p>
+                <p><strong>Cashier:</strong> {sale.user?.fullName || 'N/A'}</p>
             </div>
           </div>
           <Separator className="my-4" />
@@ -129,10 +130,10 @@ export default function Bill({ sale, isOpen, onClose }: BillProps) {
           <Button variant="outline" onClick={onClose}>
             Close
           </Button>
-          <Button onClick={handlePrint}>
-            <Printer className="mr-2 h-4 w-4" />
+          <button onClick={handlePrint} className={cn(buttonVariants())}>
+            <Printer />
             Print Bill
-          </Button>
+          </button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
