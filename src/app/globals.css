@@ -90,22 +90,28 @@
     visibility: hidden;
   }
 
-  .printable-area,
-  .printable-area * {
+  .print-container,
+  .print-container * {
     visibility: visible;
   }
 
-  .printable-area {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: auto;
-    border: none !important;
+  .print-container {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    transform: none !important;
     box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
   }
-
-  body {
-    overflow: hidden;
+  
+  .print-container > .printable-area {
+     margin: 1rem; 
+  }
+  
+  .print-container > *:not(.printable-area) {
+    display: none;
   }
 }

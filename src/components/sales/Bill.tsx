@@ -46,7 +46,7 @@ export default function Bill({ sale, isOpen, onClose }: BillProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md print-container">
         <DialogHeader>
           <DialogTitle>Sale Complete - Invoice</DialogTitle>
           <DialogDescription>
