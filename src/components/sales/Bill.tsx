@@ -56,7 +56,7 @@ export default function Bill({ sale, isOpen, onClose }: BillProps) {
               {sale.saleDate && <p><strong>Date:</strong> {format(parseISO(sale.saleDate), 'PPP p')}</p>}
             </div>
             <div className="text-right">
-                <p><strong>Cashier:</strong> {sale.user.fullName}</p>
+                <p><strong>Cashier:</strong> {sale.user?.fullName}</p>
             </div>
           </div>
           <Separator className="my-4" />

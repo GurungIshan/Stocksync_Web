@@ -30,6 +30,7 @@ import { getToken } from '@/lib/auth';
 import { getProducts, getProductsForDropdown } from '@/lib/api';
 import { getUserIdFromToken } from '@/utils/jwt';
 import Bill from './Bill';
+import { useAuth } from '@/hooks/use-auth';
 
 const salesFormSchema = z.object({
   customerPhoneNumber: z.string().optional(),
@@ -53,6 +54,7 @@ type SalesFormValues = z.infer<typeof salesFormSchema>;
 
 export default function SalesForm() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [productDropdown, setProductDropdown] = useState<ProductDropdownItem[]>([]);
@@ -201,8 +203,13 @@ export default function SalesForm() {
         });
 
         if (response.ok) {
-            const saleData: DetailedSale = await response.json();
-            setCompletedSale(saleData);
+            const saleData = await response.json();
+            setCompletedSale({
+                ...saleData,
+                user: {
+                    fullName: user?.fullName || 'N/A',
+                },
+            });
         } else {
              const errorData = await response.json().catch(() => ({ message: 'Failed to record sale. Please try again.' }));
              toast({
