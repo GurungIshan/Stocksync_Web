@@ -46,14 +46,14 @@ export default function Bill({ sale, isOpen, onClose }: BillProps) {
         <div ref={billContentRef} className="p-4 border rounded-lg bg-background text-foreground">
           <div className="text-center mb-4">
             <h2 className="text-2xl font-bold font-headline">StockSync</h2>
-            <p className="text-sm">Your Store Address, City</p>
-            <p className="text-sm">Phone: 123-456-7890</p>
+            <p className="text-sm">Kathmandu, Nepal</p>
+            <p className="text-sm">Phone: 9815120639</p>
           </div>
           <Separator className="my-4" />
           <div className="grid grid-cols-2 gap-4 text-sm mb-4">
             <div>
               <p><strong>Invoice No:</strong> {sale.invoiceNo}</p>
-              <p><strong>Date:</strong> {format(parseISO(sale.saleDate), 'PPP p')}</p>
+              {sale.saleDate && <p><strong>Date:</strong> {format(parseISO(sale.saleDate), 'PPP p')}</p>}
             </div>
             <div className="text-right">
                 <p><strong>Cashier:</strong> {sale.user.fullName}</p>

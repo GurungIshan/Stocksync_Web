@@ -111,7 +111,7 @@ export default function RecentSales() {
                     </div>
                   </TableCell>
                   <TableCell>{sale.invoiceNo}</TableCell>
-                  <TableCell>{format(parseISO(sale.saleDate), 'PP')}</TableCell>
+                  <TableCell>{sale.saleDate ? format(parseISO(sale.saleDate), 'PP') : ''}</TableCell>
                   <TableCell className="text-right">{formatCurrency(sale.totalAmount)}</TableCell>
                 </TableRow>
               ))
