@@ -100,9 +100,20 @@ export async function getSales(): Promise<Sale[]> {
       cache: 'no-store',
     });
     if (!res.ok) throw new Error('Failed to fetch sales');
-    const sales = await res.json();
+    const data = await res.json();
+    
+    let salesList: Sale[] = [];
+
+    if (Array.isArray(data)) {
+        salesList = data;
+    } else if (data && Array.isArray(data.sales)) {
+        salesList = data.sales;
+    } else {
+        console.warn("Expected an array of sales, but received:", data);
+    }
+    
     // Assuming the API returns dates as strings and we want to sort by date
-    return sales.sort((a: Sale, b: Sale) => new Date(b.saleDate).getTime() - new Date(a.saleDate).getTime());
+    return salesList.sort((a: Sale, b: Sale) => new Date(b.saleDate).getTime() - new Date(a.saleDate).getTime());
   } catch (error) {
     console.error(error);
     return [];
