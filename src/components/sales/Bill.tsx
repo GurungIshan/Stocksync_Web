@@ -78,7 +78,7 @@ export default function Bill({ sale, isOpen, onClose }: BillProps) {
               </tr>
             </thead>
             <tbody>
-              {sale.saleItems.map((item, index) => (
+              {sale.saleItems && sale.saleItems.map((item, index) => (
                 <tr key={index} className="border-b">
                   <td className="py-2">{item.productName}</td>
                   <td className="text-center py-2">{item.quantity}</td>

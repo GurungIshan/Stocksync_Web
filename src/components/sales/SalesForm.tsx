@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
 import { PlusCircle, Trash2, Loader2 } from 'lucide-react';
-import type { Product, ProductDropdownItem, DetailedSale } from '@/lib/types';
+import type { Product, ProductDropdownItem, DetailedSale, SaleItemDetail } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '../ui/separator';
 import { getToken } from '@/lib/auth';
@@ -204,11 +204,21 @@ export default function SalesForm() {
 
         if (response.ok) {
             const saleData = await response.json();
+            const saleItemsForBill: SaleItemDetail[] = data.items.map(item => {
+                const product = products.find(p => p.id === item.productId);
+                return {
+                    productName: product?.productName || 'Unknown Product',
+                    quantity: item.quantity,
+                    pricePerUnit: product?.pricePerUnit || 0,
+                    totalPrice: (product?.pricePerUnit || 0) * (item.quantity || 0),
+                };
+            });
             setCompletedSale({
                 ...saleData,
                 user: {
                     fullName: user?.fullName || 'N/A',
                 },
+                saleItems: saleItemsForBill,
             });
         } else {
              const errorData = await response.json().catch(() => ({ message: 'Failed to record sale. Please try again.' }));
