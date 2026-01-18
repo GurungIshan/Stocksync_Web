@@ -1,43 +1,18 @@
-'use client';
 
-import { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Package, AlertCircle, ShoppingCart, Loader2 } from 'lucide-react';
-import type { Product } from '@/lib/types';
-import { getDashboardStats } from '@/lib/api';
-import { getProducts } from '@/lib/api';
+import { Package, AlertCircle, ShoppingCart } from 'lucide-react';
+import { getDashboardStats, getProducts } from '@/lib/api';
 
-export default function DashboardStats() {
-  const [stats, setStats] = useState({ monthlyRevenue: 0, lowStockItems: 0 });
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchAllStats() {
-      setLoading(true);
-      try {
-        // Fetch stats and products in parallel
-        const [statsData, productsData] = await Promise.all([
-          getDashboardStats(),
-          getProducts()
-        ]);
-
-        setStats(statsData);
-        setProducts(productsData);
-
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchAllStats();
-  }, []);
+export default async function DashboardStats() {
+  const [stats, products] = await Promise.all([
+    getDashboardStats(),
+    getProducts()
+  ]);
 
   const formatCurrency = (value: number) => {
     if (typeof value !== 'number' || isNaN(value)) {
@@ -54,25 +29,21 @@ export default function DashboardStats() {
       title: "Monthly Revenue",
       value: formatCurrency(stats.monthlyRevenue),
       icon: null,
-      loading: loading,
     },
     {
       title: 'Low Stock Items',
       value: stats.lowStockItems,
       icon: <AlertCircle className="h-5 w-5 text-muted-foreground" />,
-      loading: loading,
     },
     {
       title: 'Total Products',
       value: totalProducts,
       icon: <Package className="h-5 w-5 text-muted-foreground" />,
-      loading: loading,
     },
     {
       title: 'Inventory Value',
       value: formatCurrency(inventoryValue),
       icon: <ShoppingCart className="h-5 w-5 text-muted-foreground" />,
-      loading: loading,
     },
   ];
 
@@ -85,13 +56,7 @@ export default function DashboardStats() {
             {card.icon}
           </CardHeader>
           <CardContent>
-            {card.loading ? (
-                 <div className="flex justify-start items-center h-8">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                 </div>
-            ) : (
-                <div className="text-2xl font-bold">{card.value}</div>
-            )}
+            <div className="text-2xl font-bold">{card.value}</div>
           </CardContent>
         </Card>
       ))}

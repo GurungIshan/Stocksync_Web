@@ -157,23 +157,30 @@ export default function SalesForm() {
     }
 
     const payload = {
-        customerPhoneNumber: data.customerPhoneNumber || null,
-        newCustomer: data.customerName
+        customerPhoneNumber: data.customerPhoneNumber?.trim() || null,
+      
+        newCustomer: data.customerName?.trim()
           ? {
-              customerName: data.customerName,
-              email: data.email || null,
-              address: data.address || null,
+              customerName: data.customerName.trim(),
+              email: data.email?.trim() || null,
+              address: data.address?.trim() || null,
             }
           : null,
+      
         items: data.items.map(item => ({
           productId: Number(item.productId),
           quantity: Number(item.quantity),
         })),
+      
         discount: Number(data.discount) || 0,
-        tax: Number(data.tax) || 0,
-        paymentMethod: data.paymentMethod,
+      
+        tax: Number(data.tax) || 0, // percentage
+      
+        paymentMethod: data.paymentMethod.toUpperCase(),
+      
         userId,
       };
+      
       
     const token = getToken();
 
