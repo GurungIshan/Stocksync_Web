@@ -1,3 +1,4 @@
+'use client';
 
 import {
   Card,
@@ -7,12 +8,39 @@ import {
 } from '@/components/ui/card';
 import { Package, AlertCircle, ShoppingCart } from 'lucide-react';
 import { getDashboardStats, getProducts } from '@/lib/api';
+import { useEffect, useState } from 'react';
+import type { Product } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
-export default async function DashboardStats() {
-  const [stats, products] = await Promise.all([
-    getDashboardStats(),
-    getProducts()
-  ]);
+type Stats = {
+  monthlyRevenue: number;
+  lowStockItems: number;
+}
+
+export default function DashboardStats() {
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [products, setProducts] = useState<Product[] | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      setLoading(true);
+      try {
+        const [fetchedStats, fetchedProducts] = await Promise.all([
+          getDashboardStats(),
+          getProducts()
+        ]);
+        setStats(fetchedStats);
+        setProducts(fetchedProducts);
+      } catch (error) {
+        console.error("Failed to fetch dashboard stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
 
   const formatCurrency = (value: number) => {
     if (typeof value !== 'number' || isNaN(value)) {
@@ -21,18 +49,18 @@ export default async function DashboardStats() {
     return `Nrs. ${new Intl.NumberFormat('en-IN').format(value)}`;
   }
 
-  const totalProducts = products.length;
-  const inventoryValue = products.reduce((sum, p) => sum + p.pricePerUnit * p.stockQuantity, 0);
+  const totalProducts = products?.length ?? 0;
+  const inventoryValue = products?.reduce((sum, p) => sum + p.pricePerUnit * p.stockQuantity, 0) ?? 0;
 
   const statCards = [
     {
       title: "Monthly Revenue",
-      value: formatCurrency(stats.monthlyRevenue),
+      value: formatCurrency(stats?.monthlyRevenue ?? 0),
       icon: null,
     },
     {
       title: 'Low Stock Items',
-      value: stats.lowStockItems,
+      value: stats?.lowStockItems ?? 0,
       icon: <AlertCircle className="h-5 w-5 text-muted-foreground" />,
     },
     {
@@ -46,6 +74,24 @@ export default async function DashboardStats() {
       icon: <ShoppingCart className="h-5 w-5 text-muted-foreground" />,
     },
   ];
+  
+  if (loading) {
+    return (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {statCards.map((card, index) => (
+                <Card key={index}>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <Skeleton className="h-5 w-3/4" />
+                        {card.icon}
+                    </CardHeader>
+                    <CardContent>
+                        <Skeleton className="h-8 w-1/2" />
+                    </CardContent>
+                </Card>
+            ))}
+        </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

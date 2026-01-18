@@ -1,3 +1,4 @@
+'use client';
 
 import type { Sale } from '@/lib/types';
 import {
@@ -15,14 +16,73 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { getSales } from '@/lib/api';
+import { useEffect, useState } from 'react';
 
-export default async function RecentSales() {
-  const sales = await getSales();
+export default function RecentSales() {
+  const [sales, setSales] = useState<Sale[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchSales() {
+        setLoading(true);
+        try {
+            const fetchedSales = await getSales();
+            setSales(fetchedSales);
+        } catch (error) {
+            console.error('Failed to fetch recent sales:', error);
+        } finally {
+            setLoading(false);
+        }
+    }
+    fetchSales();
+  }, []);
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'NPR', minimumFractionDigits: 0 }).format(value);
+
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Sales</CardTitle>
+          <CardDescription>Loading most recent sales...</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Customer</TableHead>
+                <TableHead>Invoice No.</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead className="text-right">Amount</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {[...Array(5)].map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell>
+                    <Skeleton className="h-5 w-24" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-5 w-16" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-5 w-20" />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Skeleton className="h-5 w-16 ml-auto" />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <Card>
