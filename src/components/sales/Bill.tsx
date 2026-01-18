@@ -13,7 +13,6 @@ import type { DetailedSale } from '@/lib/types';
 import { format, parseISO } from 'date-fns';
 import { Separator } from '@/components/ui/separator';
 import { useRef } from 'react';
-import { useReactToPrint } from 'react-to-print';
 import { Printer } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -26,9 +25,9 @@ type BillProps = {
 export default function Bill({ sale, isOpen, onClose }: BillProps) {
   const billContentRef = useRef(null);
 
-  const handlePrint = useReactToPrint({
-    content: () => billContentRef.current,
-  });
+  const handlePrint = () => {
+    window.print();
+  };
 
   if (!sale) return null;
   
@@ -54,7 +53,7 @@ export default function Bill({ sale, isOpen, onClose }: BillProps) {
             Sale recorded successfully. Here is the bill.
           </DialogDescription>
         </DialogHeader>
-        <div ref={billContentRef} className="p-4 border rounded-lg bg-background text-foreground">
+        <div ref={billContentRef} className="p-4 border rounded-lg bg-background text-foreground printable-area">
           <div className="text-center mb-4">
             <h2 className="text-2xl font-bold font-headline">StockSync</h2>
             <p className="text-sm">Kathmandu, Nepal</p>
