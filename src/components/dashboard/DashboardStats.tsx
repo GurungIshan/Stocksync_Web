@@ -44,9 +44,9 @@ export default function DashboardStats() {
 
   const formatCurrency = (value: number) => {
     if (typeof value !== 'number' || isNaN(value)) {
-      return `Nrs. 0`;
+      return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'NPR', minimumFractionDigits: 0 }).format(0);
     }
-    return `Nrs. ${new Intl.NumberFormat('en-IN').format(value)}`;
+    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'NPR', minimumFractionDigits: 0 }).format(value);
   }
 
   const totalProducts = products?.length ?? 0;

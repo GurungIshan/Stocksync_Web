@@ -23,12 +23,13 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
 import { PlusCircle, Trash2, Loader2 } from 'lucide-react';
-import type { Product, ProductDropdownItem } from '@/lib/types';
+import type { Product, ProductDropdownItem, DetailedSale } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '../ui/separator';
 import { getToken } from '@/lib/auth';
 import { getProducts, getProductsForDropdown } from '@/lib/api';
 import { getUserIdFromToken } from '@/utils/jwt';
+import Bill from './Bill';
 
 const salesFormSchema = z.object({
   customerPhoneNumber: z.string().optional(),
@@ -56,6 +57,7 @@ export default function SalesForm() {
   const [products, setProducts] = useState<Product[]>([]);
   const [productDropdown, setProductDropdown] = useState<ProductDropdownItem[]>([]);
   const [isProductsLoading, setIsProductsLoading] = useState(true);
+  const [completedSale, setCompletedSale] = useState<DetailedSale | null>(null);
 
   useEffect(() => {
     async function fetchProductsForSale() {
@@ -112,7 +114,11 @@ export default function SalesForm() {
   }, 0);
 
   const total = subTotal - watchedDiscount + (subTotal * (watchedTax / 100));
-
+  
+  const handleCloseBill = () => {
+    setCompletedSale(null);
+    form.reset();
+  };
 
   async function onSubmit(data: SalesFormValues) {
     setIsLoading(true);
@@ -195,11 +201,8 @@ export default function SalesForm() {
         });
 
         if (response.ok) {
-            toast({
-              title: 'Sale Recorded',
-              description: 'The new sale has been successfully added.',
-            });
-            form.reset();
+            const saleData: DetailedSale = await response.json();
+            setCompletedSale(saleData);
         } else {
              const errorData = await response.json().catch(() => ({ message: 'Failed to record sale. Please try again.' }));
              toast({
@@ -237,253 +240,256 @@ export default function SalesForm() {
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        <div className="lg:col-span-2 space-y-8">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Customer Details</CardTitle>
-                    <CardDescription>Enter customer information for this sale.</CardDescription>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                     <FormField
-                        control={form.control}
-                        name="customerName"
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Customer Name</FormLabel>
-                            <FormControl>
-                            <Input placeholder="Enter customer name" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="customerPhoneNumber"
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Customer Phone</FormLabel>
-                            <FormControl>
-                            <Input type="tel" placeholder="Enter phone number" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                            <Input type="email" placeholder="customer@example.com" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="address"
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Address</FormLabel>
-                            <FormControl>
-                            <Input placeholder="Enter address" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-                </CardContent>
-            </Card>
-            <Card>
-                <CardHeader>
-                    <CardTitle>Sale Items</CardTitle>
-                    <CardDescription>Add products to the sale.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    {fields.map((field, index) => {
-                    const selectedProductId = form.watch(`items.${index}.productId`);
-                    const selectedProduct = products.find(p => p.id === selectedProductId);
-                    const usedStock = selectedProduct ? getUsedStock(selectedProduct.id, index) : 0;
-                    const availableStock = selectedProduct ? selectedProduct.stockQuantity - usedStock : 0;
-                    const alreadySelectedProductIds = watchedItems.map((item, i) => i !== index ? item.productId : -1);
+    <>
+      <Bill sale={completedSale} isOpen={!!completedSale} onClose={handleCloseBill} />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+          <div className="lg:col-span-2 space-y-8">
+              <Card>
+                  <CardHeader>
+                      <CardTitle>Customer Details</CardTitle>
+                      <CardDescription>Enter customer information for this sale.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <FormField
+                          control={form.control}
+                          name="customerName"
+                          render={({ field }) => (
+                          <FormItem>
+                              <FormLabel>Customer Name</FormLabel>
+                              <FormControl>
+                              <Input placeholder="Enter customer name" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                          </FormItem>
+                          )}
+                      />
+                      <FormField
+                          control={form.control}
+                          name="customerPhoneNumber"
+                          render={({ field }) => (
+                          <FormItem>
+                              <FormLabel>Customer Phone</FormLabel>
+                              <FormControl>
+                              <Input type="tel" placeholder="Enter phone number" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                          </FormItem>
+                          )}
+                      />
+                      <FormField
+                          control={form.control}
+                          name="email"
+                          render={({ field }) => (
+                          <FormItem>
+                              <FormLabel>Email</FormLabel>
+                              <FormControl>
+                              <Input type="email" placeholder="customer@example.com" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                          </FormItem>
+                          )}
+                      />
+                      <FormField
+                          control={form.control}
+                          name="address"
+                          render={({ field }) => (
+                          <FormItem>
+                              <FormLabel>Address</FormLabel>
+                              <FormControl>
+                              <Input placeholder="Enter address" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                          </FormItem>
+                          )}
+                      />
+                  </CardContent>
+              </Card>
+              <Card>
+                  <CardHeader>
+                      <CardTitle>Sale Items</CardTitle>
+                      <CardDescription>Add products to the sale.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                      {fields.map((field, index) => {
+                      const selectedProductId = form.watch(`items.${index}.productId`);
+                      const selectedProduct = products.find(p => p.id === selectedProductId);
+                      const usedStock = selectedProduct ? getUsedStock(selectedProduct.id, index) : 0;
+                      const availableStock = selectedProduct ? selectedProduct.stockQuantity - usedStock : 0;
+                      const alreadySelectedProductIds = watchedItems.map((item, i) => i !== index ? item.productId : -1);
 
-                    return (
-                        <div key={field.id} className="flex flex-col sm:flex-row items-start sm:items-end gap-4 p-4 border rounded-lg bg-background">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1 w-full">
-                        <FormField
-                            control={form.control}
-                            name={`items.${index}.productId`}
-                            render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Product</FormLabel>
-                                <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={field.value > 0 ? field.value.toString() : ""}>
-                                <FormControl>
-                                    <SelectTrigger>
-                                    <SelectValue placeholder="Select a product" />
-                                    </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    {productDropdown.filter(p => !alreadySelectedProductIds.includes(p.id) || p.id === selectedProductId).map((product) => {
-                                        const fullProduct = products.find(fp => fp.id === product.id);
-                                        const used = fullProduct ? getUsedStock(fullProduct.id, -1) : 0;
-                                        if ((fullProduct && fullProduct.stockQuantity - used > 0) || product.id === selectedProductId) {
-                                            return (
-                                                <SelectItem key={product.id} value={product.id.toString()}>
-                                                    {product.name}
-                                                </SelectItem>
-                                            )
-                                        }
-                                        return null;
-                                    })}
-                                </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name={`items.${index}.quantity`}
-                            render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Quantity</FormLabel>
-                                <FormControl>
-                                <Input 
-                                    type="number" 
-                                    placeholder="Enter quantity" 
-                                    {...field}
-                                    onChange={(e) => {
-                                        const value = e.target.value === '' ? 0 : Number(e.target.value);
-                                        field.onChange(value);
-                                        if (value > availableStock) {
-                                            form.setError(`items.${index}.quantity`, {
-                                            type: 'manual',
-                                            message: `Max stock: ${availableStock}.`
-                                            });
-                                        } else {
-                                            form.clearErrors(`items.${index}.quantity`);
-                                        }
-                                    }}
-                                />
-                                </FormControl>
-                                {selectedProduct ? <p className="text-xs text-muted-foreground pt-1">{`Available: ${availableStock}`}</p> : null}
-                                <FormMessage />
-                            </FormItem>
-                            )}
-                        />
-                        </div>
-                        <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                            <span className="sr-only">Remove item</span>
-                        </Button>
-                        </div>
-                    )})}
-                    <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="mt-2"
-                    onClick={() => append({ productId: 0, quantity: 1 })}
-                    >
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Add Item
-                    </Button>
-                </CardContent>
-            </Card>
-        </div>
+                      return (
+                          <div key={field.id} className="flex flex-col sm:flex-row items-start sm:items-end gap-4 p-4 border rounded-lg bg-background">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1 w-full">
+                          <FormField
+                              control={form.control}
+                              name={`items.${index}.productId`}
+                              render={({ field }) => (
+                              <FormItem>
+                                  <FormLabel>Product</FormLabel>
+                                  <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={field.value > 0 ? field.value.toString() : ""}>
+                                  <FormControl>
+                                      <SelectTrigger>
+                                      <SelectValue placeholder="Select a product" />
+                                      </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                      {productDropdown.filter(p => !alreadySelectedProductIds.includes(p.id) || p.id === selectedProductId).map((product) => {
+                                          const fullProduct = products.find(fp => fp.id === product.id);
+                                          const used = fullProduct ? getUsedStock(fullProduct.id, -1) : 0;
+                                          if ((fullProduct && fullProduct.stockQuantity - used > 0) || product.id === selectedProductId) {
+                                              return (
+                                                  <SelectItem key={product.id} value={product.id.toString()}>
+                                                      {product.name}
+                                                  </SelectItem>
+                                              )
+                                          }
+                                          return null;
+                                      })}
+                                  </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                              </FormItem>
+                              )}
+                          />
+                          <FormField
+                              control={form.control}
+                              name={`items.${index}.quantity`}
+                              render={({ field }) => (
+                              <FormItem>
+                                  <FormLabel>Quantity</FormLabel>
+                                  <FormControl>
+                                  <Input 
+                                      type="number" 
+                                      placeholder="Enter quantity" 
+                                      {...field}
+                                      onChange={(e) => {
+                                          const value = e.target.value === '' ? 0 : Number(e.target.value);
+                                          field.onChange(value);
+                                          if (value > availableStock) {
+                                              form.setError(`items.${index}.quantity`, {
+                                              type: 'manual',
+                                              message: `Max stock: ${availableStock}.`
+                                              });
+                                          } else {
+                                              form.clearErrors(`items.${index}.quantity`);
+                                          }
+                                      }}
+                                  />
+                                  </FormControl>
+                                  {selectedProduct ? <p className="text-xs text-muted-foreground pt-1">{`Available: ${availableStock}`}</p> : null}
+                                  <FormMessage />
+                              </FormItem>
+                              )}
+                          />
+                          </div>
+                          <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                              <span className="sr-only">Remove item</span>
+                          </Button>
+                          </div>
+                      )})}
+                      <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="mt-2"
+                      onClick={() => append({ productId: 0, quantity: 1 })}
+                      >
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Add Item
+                      </Button>
+                  </CardContent>
+              </Card>
+          </div>
 
-        <div className="lg:col-span-1 space-y-8 lg:sticky lg:top-24">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Order Summary</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                     <div className="space-y-2">
-                        <div className="flex justify-between">
-                            <span>Subtotal</span>
-                            <span>{formatCurrency(subTotal)}</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                           <FormLabel htmlFor='discount-input'>Discount</FormLabel>
-                            <FormField
-                                control={form.control}
-                                name="discount"
-                                render={({ field }) => (
-                                    <FormItem className="w-24">
-                                    <FormControl>
-                                        <Input id="discount-input" type="number" placeholder="0" className="text-right" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <FormLabel htmlFor='tax-input'>Tax (%)</FormLabel>
-                             <FormField
-                                control={form.control}
-                                name="tax"
-                                render={({ field }) => (
-                                    <FormItem className="w-24">
-                                    <FormControl>
-                                        <Input id="tax-input" type="number" placeholder="0" className="text-right" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-                     </div>
-                     <Separator />
-                     <div className="flex justify-between text-xl font-bold">
-                        <span>Total</span>
-                        <span>{formatCurrency(total)}</span>
-                    </div>
-                    <Separator />
-                     <FormField
-                        control={form.control}
-                        name="paymentMethod"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Payment Method</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                    <SelectTrigger>
-                                    <SelectValue placeholder="Select payment method" />
-                                    </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    <SelectItem value="Cash">Cash</SelectItem>
-                                    <SelectItem value="Card">Card</SelectItem>
-                                    <SelectItem value="Digital">Digital</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </CardContent>
-                <CardFooter>
-                    <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
-                        {isLoading ? (
-                            <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Processing...
-                            </>
-                        ) : (
-                            'Complete Sale'
-                        )}
-                    </Button>
-                </CardFooter>
-            </Card>
-        </div>
-      </form>
-    </Form>
+          <div className="lg:col-span-1 space-y-8 lg:sticky lg:top-24">
+              <Card>
+                  <CardHeader>
+                      <CardTitle>Order Summary</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                          <div className="flex justify-between">
+                              <span>Subtotal</span>
+                              <span>{formatCurrency(subTotal)}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <FormLabel htmlFor='discount-input'>Discount</FormLabel>
+                              <FormField
+                                  control={form.control}
+                                  name="discount"
+                                  render={({ field }) => (
+                                      <FormItem className="w-24">
+                                      <FormControl>
+                                          <Input id="discount-input" type="number" placeholder="0" className="text-right" {...field} />
+                                      </FormControl>
+                                      <FormMessage />
+                                      </FormItem>
+                                  )}
+                              />
+                          </div>
+                          <div className="flex justify-between items-center">
+                              <FormLabel htmlFor='tax-input'>Tax (%)</FormLabel>
+                              <FormField
+                                  control={form.control}
+                                  name="tax"
+                                  render={({ field }) => (
+                                      <FormItem className="w-24">
+                                      <FormControl>
+                                          <Input id="tax-input" type="number" placeholder="0" className="text-right" {...field} />
+                                      </FormControl>
+                                      <FormMessage />
+                                      </FormItem>
+                                  )}
+                              />
+                          </div>
+                      </div>
+                      <Separator />
+                      <div className="flex justify-between text-xl font-bold">
+                          <span>Total</span>
+                          <span>{formatCurrency(total)}</span>
+                      </div>
+                      <Separator />
+                      <FormField
+                          control={form.control}
+                          name="paymentMethod"
+                          render={({ field }) => (
+                              <FormItem>
+                              <FormLabel>Payment Method</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                  <FormControl>
+                                      <SelectTrigger>
+                                      <SelectValue placeholder="Select payment method" />
+                                      </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                      <SelectItem value="Cash">Cash</SelectItem>
+                                      <SelectItem value="Card">Card</SelectItem>
+                                      <SelectItem value="Digital">Digital</SelectItem>
+                                  </SelectContent>
+                              </Select>
+                              <FormMessage />
+                              </FormItem>
+                          )}
+                      />
+                  </CardContent>
+                  <CardFooter>
+                      <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
+                          {isLoading ? (
+                              <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Processing...
+                              </>
+                          ) : (
+                              'Complete Sale'
+                          )}
+                      </Button>
+                  </CardFooter>
+              </Card>
+          </div>
+        </form>
+      </Form>
+    </>
   );
 }

@@ -57,8 +57,35 @@ export type Alert = {
   urgencyLevel: 'HIGH' | 'MEDIUM' | 'LOW';
 };
 
-
 export type CartItem = {
   product: Product;
   quantity: number;
+};
+
+export type SaleItemDetail = {
+  productName: string;
+  quantity: number;
+  pricePerUnit: number;
+  totalPrice: number;
+};
+
+export type UserInfo = {
+  fullName: string;
+};
+
+export type DetailedSale = {
+  saleId: number;
+  invoiceNo: string;
+  saleDate: string;
+  customerName: string | null;
+  customerPhone: string | null;
+  customerEmail: string | null;
+  customerAddress: string | null;
+  totalAmount: number;
+  subTotal: number;
+  discount: number;
+  tax: number;
+  paymentMethod: string;
+  user: UserInfo;
+  saleItems: SaleItemDetail[];
 };
