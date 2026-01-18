@@ -31,8 +31,18 @@ export default function Bill({ sale, isOpen, onClose }: BillProps) {
 
   if (!sale) return null;
   
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'NPR', minimumFractionDigits: 2 }).format(value);
+  const formatCurrency = (value: number) => {
+    if (isNaN(value)) {
+      return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'NPR', minimumFractionDigits: 2 }).format(0);
+    }
+    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'NPR', minimumFractionDigits: 2 }).format(value);
+  }
+
+  const subTotal = sale.subTotal || 0;
+  const discount = sale.discount || 0;
+  const taxPercent = sale.tax || 0;
+  const taxAmount = (subTotal - discount) * (taxPercent / 100);
+  const totalAmount = sale.totalAmount || 0;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -93,19 +103,19 @@ export default function Bill({ sale, isOpen, onClose }: BillProps) {
             <div className="w-full max-w-xs space-y-2 text-sm">
                 <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span>{formatCurrency(sale.subTotal)}</span>
+                    <span>{formatCurrency(subTotal)}</span>
                 </div>
                  <div className="flex justify-between">
                     <span>Discount</span>
-                    <span>- {formatCurrency(sale.discount)}</span>
+                    <span>- {formatCurrency(discount)}</span>
                 </div>
                  <div className="flex justify-between">
-                    <span>Tax ({sale.tax}%)</span>
-                    <span>+ {formatCurrency((sale.subTotal - sale.discount) * (sale.tax / 100))}</span>
+                    <span>Tax ({taxPercent}%)</span>
+                    <span>+ {formatCurrency(taxAmount)}</span>
                 </div>
                  <div className="flex justify-between font-bold text-base border-t pt-2 mt-2">
                     <span>Grand Total</span>
-                    <span>{formatCurrency(sale.totalAmount)}</span>
+                    <span>{formatCurrency(totalAmount)}</span>
                 </div>
             </div>
           </div>

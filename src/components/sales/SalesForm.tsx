@@ -213,12 +213,22 @@ export default function SalesForm() {
                     totalPrice: (product?.pricePerUnit || 0) * (item.quantity || 0),
                 };
             });
+             const subTotalForBill = saleItemsForBill.reduce((acc, item) => acc + item.totalPrice, 0);
+
             setCompletedSale({
                 ...saleData,
+                customerName: data.customerName || 'Walk-in Customer',
+                customerPhone: data.customerPhoneNumber || null,
+                customerEmail: data.email || null,
+                customerAddress: data.address || null,
                 user: {
                     fullName: user?.fullName || 'N/A',
                 },
                 saleItems: saleItemsForBill,
+                subTotal: subTotalForBill,
+                discount: data.discount || 0,
+                tax: data.tax || 0,
+                paymentMethod: data.paymentMethod
             });
         } else {
              const errorData = await response.json().catch(() => ({ message: 'Failed to record sale. Please try again.' }));
