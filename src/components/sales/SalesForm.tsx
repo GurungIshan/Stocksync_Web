@@ -28,6 +28,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Separator } from '../ui/separator';
 import { getToken } from '@/lib/auth';
 import { getProducts, getProductsForDropdown } from '@/lib/api';
+import { getUserIdFromToken } from '@/utils/jwt';
 
 const salesFormSchema = z.object({
   customerPhoneNumber: z.string().optional(),
@@ -115,16 +116,6 @@ export default function SalesForm() {
 
   async function onSubmit(data: SalesFormValues) {
     setIsLoading(true);
-    const token = getToken();
-    if (!token) {
-        toast({
-            variant: "destructive",
-            title: "Authentication Error",
-            description: "You must be logged in to record a sale.",
-        });
-        setIsLoading(false);
-        return;
-    }
     
     let hasValidationError = false;
     data.items.forEach((item, index) => {
@@ -154,21 +145,37 @@ export default function SalesForm() {
       return;
     }
 
+    const userId = getUserIdFromToken();
+    if (!userId) {
+      toast({
+        variant: 'destructive',
+        title: 'Authentication Error',
+        description: 'User not authenticated. Please log in again.',
+      });
+      setIsLoading(false);
+      return;
+    }
+
     const payload = {
-        customerPhoneNumber: data.customerPhoneNumber,
-        newCustomer: {
-            customerName: data.customerName,
-            email: data.email,
-            address: data.address,
-        },
+        customerPhoneNumber: data.customerPhoneNumber || null,
+        newCustomer: data.customerName
+          ? {
+              customerName: data.customerName,
+              email: data.email || null,
+              address: data.address || null,
+            }
+          : null,
         items: data.items.map(item => ({
-            productId: item.productId,
-            quantity: item.quantity,
+          productId: Number(item.productId),
+          quantity: Number(item.quantity),
         })),
-        discount: data.discount || 0,
-        tax: data.tax || 0,
-        paymentMethod: data.paymentMethod.toLowerCase(),
-    };
+        discount: Number(data.discount) || 0,
+        tax: Number(data.tax) || 0,
+        paymentMethod: data.paymentMethod,
+        userId,
+      };
+      
+    const token = getToken();
 
     try {
         const response = await fetch('https://localhost:7232/api/Sales', {

@@ -18,13 +18,15 @@ export async function getProducts(categoryId?: string | null): Promise<Product[]
   const response = await fetch(url, {
     headers: {
       'Authorization': `Bearer ${token}`,
-      'Accept': 'application/json',
+      'Accept': 'application/json'
     },
-    cache: 'no-store',
+    cache: 'no-store'
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch products: ${response.status}`);
+    const errorText = await response.text();
+    console.error('Backend error:', errorText);
+    throw new Error(errorText);
   }
 
   return response.json();
