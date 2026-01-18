@@ -17,7 +17,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { getSales } from '@/lib/api';
 import { useEffect, useState } from 'react';
 
@@ -111,7 +111,7 @@ export default function RecentSales() {
                     </div>
                   </TableCell>
                   <TableCell>{sale.invoiceNo}</TableCell>
-                  <TableCell>{format(new Date(sale.saleDate), 'PP')}</TableCell>
+                  <TableCell>{format(parseISO(sale.saleDate), 'PP')}</TableCell>
                   <TableCell className="text-right">{formatCurrency(sale.totalAmount)}</TableCell>
                 </TableRow>
               ))

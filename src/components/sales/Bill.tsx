@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import type { DetailedSale } from '@/lib/types';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { Separator } from '@/components/ui/separator';
 import { useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
@@ -53,7 +53,7 @@ export default function Bill({ sale, isOpen, onClose }: BillProps) {
           <div className="grid grid-cols-2 gap-4 text-sm mb-4">
             <div>
               <p><strong>Invoice No:</strong> {sale.invoiceNo}</p>
-              <p><strong>Date:</strong> {format(new Date(sale.saleDate), 'PPP p')}</p>
+              <p><strong>Date:</strong> {format(parseISO(sale.saleDate), 'PPP p')}</p>
             </div>
             <div className="text-right">
                 <p><strong>Cashier:</strong> {sale.user.fullName}</p>
