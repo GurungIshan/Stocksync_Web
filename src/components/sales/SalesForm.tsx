@@ -407,7 +407,7 @@ export default function SalesForm() {
                                   </FormControl>
                                   <div className="pt-1">
                                     {selectedProduct ? <p className="text-xs text-muted-foreground">{`Available: ${availableStock}`}</p> : null}
-                                    {selectedProduct && selectedProduct.stockQuantity <= selectedProduct.reorderLevel && (
+                                    {selectedProduct && selectedProduct.reorderLevel > 0 && selectedProduct.stockQuantity <= selectedProduct.reorderLevel && (
                                         <p className="text-xs text-yellow-500 flex items-center gap-1 mt-1">
                                             <AlertTriangle className="h-3 w-3" />
                                             Low in stock. Only {selectedProduct.stockQuantity} left.
