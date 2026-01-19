@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
-import { PlusCircle, Trash2, Loader2 } from 'lucide-react';
+import { PlusCircle, Trash2, Loader2, AlertTriangle } from 'lucide-react';
 import type { Product, ProductDropdownItem, DetailedSale, SaleItemDetail } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '../ui/separator';
@@ -114,8 +114,9 @@ export default function SalesForm() {
     const product = products.find((p) => p.id === item.productId);
     return acc + (product ? product.pricePerUnit * (item.quantity || 0) : 0);
   }, 0);
-
-  const total = subTotal - watchedDiscount + (subTotal * (watchedTax / 100));
+  
+  const taxAmount = (subTotal - watchedDiscount) * (watchedTax / 100);
+  const total = subTotal - watchedDiscount + taxAmount;
   
   const handleCloseBill = () => {
     setCompletedSale(null);
@@ -404,7 +405,15 @@ export default function SalesForm() {
                                       }}
                                   />
                                   </FormControl>
-                                  {selectedProduct ? <p className="text-xs text-muted-foreground pt-1">{`Available: ${availableStock}`}</p> : null}
+                                  <div className="pt-1">
+                                    {selectedProduct ? <p className="text-xs text-muted-foreground">{`Available: ${availableStock}`}</p> : null}
+                                    {selectedProduct && selectedProduct.stockQuantity <= selectedProduct.reorderLevel && (
+                                        <p className="text-xs text-yellow-500 flex items-center gap-1 mt-1">
+                                            <AlertTriangle className="h-3 w-3" />
+                                            Low in stock. Only {selectedProduct.stockQuantity} left.
+                                        </p>
+                                    )}
+                                  </div>
                                   <FormMessage />
                               </FormItem>
                               )}
