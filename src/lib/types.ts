@@ -89,3 +89,8 @@ export type DetailedSale = {
   user: UserInfo;
   saleItems: SaleItemDetail[];
 };
+
+export type Stats = {
+  monthlyRevenue: number;
+  lowStockItems: number;
+};

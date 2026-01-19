@@ -9,13 +9,8 @@ import {
 import { Package, AlertCircle, ShoppingCart } from 'lucide-react';
 import { getDashboardStats, getProducts } from '@/lib/api';
 import { useEffect, useState } from 'react';
-import type { Product } from '@/lib/types';
+import type { Product, Stats } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
-
-type Stats = {
-  monthlyRevenue: number;
-  lowStockItems: number;
-}
 
 export default function DashboardStats() {
   const [stats, setStats] = useState<Stats | null>(null);
