@@ -1,18 +1,17 @@
-
 import type { Alert } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import { Badge, type BadgeProps } from "@/components/ui/badge";
 
 type AlertsTableProps = {
     alerts: Alert[];
 }
 
 export default function AlertsTable({ alerts }: AlertsTableProps) {
-    const getUrgencyBadgeVariant = (urgency: Alert['urgencyLevel']) => {
+    const getUrgencyBadgeVariant = (urgency: Alert['urgencyLevel']): BadgeProps['variant'] => {
         switch (urgency) {
             case 'HIGH': return 'destructive';
-            case 'MEDIUM': return 'default';
+            case 'MEDIUM': return 'outline';
             default: return 'secondary';
         }
     };
@@ -24,6 +23,13 @@ export default function AlertsTable({ alerts }: AlertsTableProps) {
             default: return '';
         }
     };
+
+    const getUrgencyBadgeClass = (urgency: Alert['urgencyLevel']) => {
+        if (urgency === 'MEDIUM') {
+            return 'border-accent text-accent';
+        }
+        return '';
+    }
 
     return (
         <Card>
@@ -51,7 +57,12 @@ export default function AlertsTable({ alerts }: AlertsTableProps) {
                                 <TableRow key={alert.productId} className={getUrgencyRowClass(alert.urgencyLevel)}>
                                     <TableCell className="font-medium">{alert.productName}</TableCell>
                                     <TableCell>
-                                        <Badge variant={getUrgencyBadgeVariant(alert.urgencyLevel)}>{alert.urgencyLevel}</Badge>
+                                        <Badge 
+                                            variant={getUrgencyBadgeVariant(alert.urgencyLevel)} 
+                                            className={getUrgencyBadgeClass(alert.urgencyLevel)}
+                                        >
+                                            {alert.urgencyLevel}
+                                        </Badge>
                                     </TableCell>
                                     <TableCell className="text-center font-bold text-destructive">{alert.currentStock}</TableCell>
                                     <TableCell className="text-center">{alert.reorderPoint}</TableCell>
