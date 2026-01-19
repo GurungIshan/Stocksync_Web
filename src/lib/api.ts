@@ -1,5 +1,5 @@
 
-import type { Product, Sale, Alert, CategoryDropdownItem, ProductDropdownItem } from './types';
+import type { Product, Sale, Alert, CategoryDropdownItem, ProductDropdownItem, Stats } from './types';
 import { getToken } from './auth';
 
 // Simulate API delay
@@ -113,7 +113,10 @@ export async function getSales(): Promise<Sale[]> {
     }
     
     // Assuming the API returns dates as strings and we want to sort by date
-    return salesList.sort((a: Sale, b: Sale) => new Date(b.saleDate).getTime() - new Date(a.saleDate).getTime());
+    return salesList.sort((a: Sale, b: Sale) => {
+        if (!a.saleDate || !b.saleDate) return 0;
+        return new Date(b.saleDate).getTime() - new Date(a.saleDate).getTime()
+    });
   } catch (error) {
     console.error(error);
     return [];
@@ -124,7 +127,7 @@ export async function getReorderAlerts(): Promise<Alert[]> {
     const token = getToken();
     if (!token) return [];
     try {
-        const res = await fetch('https://localhost:7232/api/Product/reorder-alerts', {
+        const res = await fetch('https://localhost:7232/api/Sales/reorder-alerts', {
             headers: { 'Authorization': `Bearer ${token}` },
             cache: 'no-store',
         });
@@ -137,7 +140,7 @@ export async function getReorderAlerts(): Promise<Alert[]> {
     }
 }
 
-export async function getDashboardStats() {
+export async function getDashboardStats(): Promise<Stats> {
     const token = getToken();
     if (!token) return { monthlyRevenue: 0, lowStockItems: 0 };
      try {
@@ -146,7 +149,7 @@ export async function getDashboardStats() {
                 headers: { 'Authorization': `Bearer ${token}` },
                 cache: 'no-store',
             }),
-            fetch('https://localhost:7232/api/Product/reorder-alerts', {
+            fetch('https://localhost:7232/api/Sales/reorder-alerts', {
                 headers: { 'Authorization': `Bearer ${token}` },
                 cache: 'no-store',
             })
@@ -156,10 +159,10 @@ export async function getDashboardStats() {
         if (!alertsRes.ok) throw new Error('Failed to fetch reorder alerts');
 
         const revenueData = await revenueRes.json();
-        const monthlyRevenue = revenueData.monthlyRevenue;
+        const monthlyRevenue = revenueData.monthlyRevenue || 0;
         
         const alertsData = await alertsRes.json();
-        const lowStockItems = alertsData.totalAlerts || 0;
+        const lowStockItems = alertsData.alerts ? alertsData.alerts.length : 0;
 
         return { monthlyRevenue, lowStockItems };
     } catch (error) {
