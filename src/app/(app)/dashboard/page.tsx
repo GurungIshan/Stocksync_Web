@@ -1,6 +1,6 @@
 
 import DashboardStats from '@/components/dashboard/DashboardStats';
-import RecentSales from '@/components/dashboard/RecentSales';
+import UserSales from '@/components/dashboard/UserSales';
 
 export default function DashboardPage() {
   return (
@@ -8,7 +8,7 @@ export default function DashboardPage() {
       <h1 className="text-3xl font-bold font-headline">Dashboard</h1>
       <DashboardStats />
       <div className="grid grid-cols-1 gap-6">
-        <RecentSales />
+        <UserSales />
       </div>
     </div>
   );

@@ -20,8 +20,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { format, parseISO } from 'date-fns';
 import { getSales } from '@/lib/api';
 import { useEffect, useState } from 'react';
+import { getUserIdFromToken } from '@/utils/jwt';
 
-export default function RecentSales() {
+export default function UserSales() {
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,10 +30,14 @@ export default function RecentSales() {
     async function fetchSales() {
         setLoading(true);
         try {
+            const currentUserId = getUserIdFromToken();
             const fetchedSales = await getSales();
-            setSales(fetchedSales);
+            if(currentUserId) {
+                const userSales = fetchedSales.filter(sale => sale.userId.toString() === currentUserId);
+                setSales(userSales);
+            }
         } catch (error) {
-            console.error('Failed to fetch recent sales:', error);
+            console.error('Failed to fetch user sales:', error);
         } finally {
             setLoading(false);
         }
@@ -47,8 +52,8 @@ export default function RecentSales() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Recent Sales</CardTitle>
-          <CardDescription>Loading most recent sales...</CardDescription>
+          <CardTitle>Your Recent Sales</CardTitle>
+          <CardDescription>Loading your most recent sales...</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -87,8 +92,8 @@ export default function RecentSales() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Recent Sales</CardTitle>
-        <CardDescription>A list of your most recent sales.</CardDescription>
+        <CardTitle>Your Recent Sales</CardTitle>
+        <CardDescription>A list of sales you have processed.</CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
@@ -118,7 +123,7 @@ export default function RecentSales() {
             ) : (
               <TableRow>
                 <TableCell colSpan={4} className="h-24 text-center">
-                  No recent sales found.
+                  You have not made any sales recently.
                 </TableCell>
               </TableRow>
             )}

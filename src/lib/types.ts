@@ -35,6 +35,7 @@ export type Product = {
 
 export type Sale = {
   saleId: number;
+  userId: number;
   invoiceNo: string;
   saleDate: string;
   customerName: string | null;
@@ -91,6 +92,5 @@ export type DetailedSale = {
 };
 
 export type Stats = {
-  monthlyRevenue: number;
   lowStockItems: number;
 };
