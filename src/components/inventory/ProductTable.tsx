@@ -1,29 +1,40 @@
 'use client';
 import { useEffect, useState } from "react";
 import type { Product } from "@/lib/types";
-import { Card, CardContent } from '@/components/ui/card';
-import { getProducts } from "@/lib/api";
-import ProductCard from "./ProductCard";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-
-const ProductCardSkeleton = () => (
-    <Card className="overflow-hidden">
-        <Skeleton className="h-40 w-full" />
-        <CardContent className="p-4 space-y-2">
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
-            <div className="flex justify-between items-center mt-2">
-                <Skeleton className="h-3 w-1/4" />
-                <Skeleton className="h-5 w-16" />
-            </div>
-        </CardContent>
-    </Card>
-);
-
+import { getProducts } from "@/lib/api";
+import { cn } from "@/lib/utils";
 
 type ProductTableProps = {
     selectedCategory: string | null;
 }
+
+const ProductRowSkeleton = () => (
+    <TableRow>
+        <TableCell><Skeleton className="h-4 w-40" /></TableCell>
+        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+        <TableCell className="text-right"><Skeleton className="h-4 w-20 ml-auto" /></TableCell>
+        <TableCell className="text-center"><Skeleton className="h-4 w-16 mx-auto" /></TableCell>
+        <TableCell className="text-center"><Skeleton className="h-6 w-24 rounded-full mx-auto" /></TableCell>
+    </TableRow>
+);
 
 export default function ProductTable({ selectedCategory }: ProductTableProps) {
     const [products, setProducts] = useState<Product[]>([]);
@@ -37,7 +48,7 @@ export default function ProductTable({ selectedCategory }: ProductTableProps) {
                 setProducts(data);
             } catch (error) {
                 console.error('Failed to fetch products:', error);
-                setProducts([]); // Clear products on error
+                setProducts([]);
             } finally {
                 setLoading(false);
             }
@@ -45,25 +56,77 @@ export default function ProductTable({ selectedCategory }: ProductTableProps) {
         fetchProducts();
     }, [selectedCategory]);
 
+    const formatCurrency = (value: number) =>
+        new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'NPR',
+            minimumFractionDigits: 0,
+        }).format(value);
+
+    const getStatus = (product: Product): { text: string; variant: 'destructive' | 'secondary' | 'outline', className?: string } => {
+        if (product.stockQuantity <= 0) {
+            return { text: 'Out of Stock', variant: 'destructive' };
+        }
+        if (product.reorderLevel > 0 && product.stockQuantity <= product.reorderLevel) {
+            return { text: 'Low Stock', variant: 'outline', className: 'text-accent border-accent' };
+        }
+        return { text: 'In Stock', variant: 'secondary' };
+    };
+
     return (
-        <div>
-            {loading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {[...Array(8)].map((_, i) => <ProductCardSkeleton key={i} />)}
-                </div>
-            ) : products.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {products.map((product) => (
-                        <ProductCard key={product.id} product={product} />
-                    ))}
-                </div>
-            ) : (
-                <Card>
-                    <CardContent className="h-64 flex items-center justify-center">
-                        <p className="text-muted-foreground">No products found for the selected category.</p>
-                    </CardContent>
-                </Card>
-            )}
-        </div>
+        <Card className="overflow-hidden">
+            <CardHeader>
+                <CardTitle>Product List</CardTitle>
+                <CardDescription>
+                    A comprehensive list of all products in your inventory.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Product Name</TableHead>
+                            <TableHead>SKU</TableHead>
+                            <TableHead>Category</TableHead>
+                            <TableHead className="text-right">Price</TableHead>
+                            <TableHead className="text-center">Stock</TableHead>
+                            <TableHead className="text-center">Status</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {loading ? (
+                            [...Array(8)].map((_, i) => <ProductRowSkeleton key={i} />)
+                        ) : products.length > 0 ? (
+                            products.map((product) => {
+                                const status = getStatus(product);
+                                return (
+                                    <TableRow key={product.id} className="transition-colors hover:bg-muted/50">
+                                        <TableCell className="font-medium">{product.productName}</TableCell>
+                                        <TableCell className="text-muted-foreground">{product.sku}</TableCell>
+                                        <TableCell className="text-muted-foreground">{product.category.name}</TableCell>
+                                        <TableCell className="text-right">{formatCurrency(product.pricePerUnit)}</TableCell>
+                                        <TableCell className={cn("text-center font-bold", {
+                                            'text-destructive': status.text === 'Out of Stock',
+                                            'text-accent': status.text === 'Low Stock'
+                                        })}>
+                                            {product.stockQuantity}
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                            <Badge variant={status.variant} className={cn('font-semibold', status.className)}>{status.text}</Badge>
+                                        </TableCell>
+                                    </TableRow>
+                                )
+                            })
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={6} className="h-24 text-center">
+                                    No products found for the selected category.
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
     );
 }
