@@ -99,8 +99,15 @@ export default function ProductTable({ selectedCategory }: ProductTableProps) {
                         ) : products.length > 0 ? (
                             products.map((product) => {
                                 const status = getStatus(product);
+                                const rowClass =
+                                  status.text === 'Out of Stock'
+                                    ? 'bg-destructive/10 hover:bg-destructive/20'
+                                    : status.text === 'Low Stock'
+                                    ? 'bg-accent/10 hover:bg-accent/20'
+                                    : 'hover:bg-muted/50';
+
                                 return (
-                                    <TableRow key={product.id} className="transition-colors hover:bg-muted/50">
+                                    <TableRow key={product.id} className={cn("transition-colors", rowClass)}>
                                         <TableCell className="font-medium">{product.productName}</TableCell>
                                         <TableCell className="text-muted-foreground">{product.sku}</TableCell>
                                         <TableCell className="text-muted-foreground">{product.category.name}</TableCell>
