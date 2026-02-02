@@ -14,7 +14,7 @@ import {
   ChartTooltipContent,
   ChartConfig,
 } from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Defs, LinearGradient, Stop } from "recharts";
 import { Skeleton } from '@/components/ui/skeleton';
 import { format, parseISO } from 'date-fns';
 import { getSales } from '@/lib/api';
@@ -78,8 +78,8 @@ export default function UserSales() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Your Sales</CardTitle>
-          <CardDescription>Loading your sales data...</CardDescription>
+          <Skeleton className="h-6 w-1/2" />
+          <Skeleton className="h-4 w-3/4" />
         </CardHeader>
         <CardContent className="pl-2">
             <Skeleton className="h-[350px] w-full" />
@@ -89,26 +89,32 @@ export default function UserSales() {
   }
 
   return (
-    <Card>
+    <Card className="transition-all duration-300 hover:shadow-accent/20 hover:shadow-lg hover:-translate-y-1">
       <CardHeader>
-        <CardTitle>Your Sales (Recent Activity)</CardTitle>
-        <CardDescription>A bar chart showing your recent sales performance.</CardDescription>
+        <CardTitle>Your Sales Performance</CardTitle>
+        <CardDescription>Your sales activity over the last 7 active days.</CardDescription>
       </CardHeader>
       <CardContent className="pl-2">
         {chartData.length > 0 ? (
             <ChartContainer config={chartConfig} className="h-[350px] w-full">
                 <BarChart accessibilityLayer data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                    <CartesianGrid vertical={false} />
+                    <defs>
+                        <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="var(--color-sales)" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="var(--color-sales)" stopOpacity={0.1}/>
+                        </linearGradient>
+                    </defs>
+                    <CartesianGrid vertical={false} strokeDasharray="3 3" />
                     <XAxis
                         dataKey="date"
                         tickLine={false}
                         tickMargin={10}
                         axisLine={false}
-                        stroke="#888888"
+                        stroke="hsl(var(--muted-foreground))"
                         fontSize={12}
                     />
                     <YAxis 
-                        stroke="#888888"
+                        stroke="hsl(var(--muted-foreground))"
                         fontSize={12}
                         tickLine={false}
                         axisLine={false}
@@ -119,9 +125,11 @@ export default function UserSales() {
                         content={<ChartTooltipContent
                             formatter={(value) => formatCurrency(value as number)}
                             labelClassName="font-bold"
+                            indicator="dot"
+                            className="bg-background/90 backdrop-blur-sm"
                         />}
                     />
-                    <Bar dataKey="sales" fill="var(--color-sales)" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="sales" fill="url(#salesGradient)" radius={[4, 4, 0, 0]} />
                 </BarChart>
             </ChartContainer>
         ) : (

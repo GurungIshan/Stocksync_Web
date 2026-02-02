@@ -51,15 +51,15 @@ export default function DashboardStats() {
   
   if (loading) {
     return (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {[...Array(3)].map((_, index) => (
                 <Card key={index}>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <Skeleton className="h-5 w-3/4" />
-                        <Skeleton className="h-5 w-5" />
+                        <Skeleton className="h-6 w-6 rounded-full" />
                     </CardHeader>
                     <CardContent>
-                        <Skeleton className="h-8 w-1/2" />
+                        <Skeleton className="h-8 w-1/2 mt-2" />
                     </CardContent>
                 </Card>
             ))}
@@ -68,34 +68,34 @@ export default function DashboardStats() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <Card>
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <Card className="transition-all duration-300 hover:shadow-accent/20 hover:shadow-lg hover:-translate-y-1">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Low Stock Items</CardTitle>
-                <AlertCircle className={cn("h-5 w-5", lowStockCount > 0 ? "text-destructive" : "text-muted-foreground")} />
+                <AlertCircle className={cn("h-6 w-6", lowStockCount > 0 ? "text-destructive" : "text-muted-foreground")} />
             </CardHeader>
             <CardContent>
-                <div className={cn("text-2xl font-bold", lowStockCount > 0 && "text-destructive")}>
+                <div className={cn("text-3xl font-bold", lowStockCount > 0 && "text-destructive")}>
                     {lowStockCount}
                 </div>
             </CardContent>
         </Card>
-        <Card>
+        <Card className="transition-all duration-300 hover:shadow-accent/20 hover:shadow-lg hover:-translate-y-1">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Products</CardTitle>
-                <Package className="h-5 w-5 text-muted-foreground" />
+                <Package className="h-6 w-6 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">{totalProducts}</div>
+                <div className="text-3xl font-bold">{totalProducts}</div>
             </CardContent>
         </Card>
-        <Card>
+        <Card className="transition-all duration-300 hover:shadow-accent/20 hover:shadow-lg hover:-translate-y-1">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Inventory Value</CardTitle>
-                <ShoppingCart className="h-5 w-5 text-muted-foreground" />
+                <ShoppingCart className="h-6 w-6 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">{formatCurrency(inventoryValue)}</div>
+                <div className="text-3xl font-bold">{formatCurrency(inventoryValue)}</div>
             </CardContent>
         </Card>
     </div>
