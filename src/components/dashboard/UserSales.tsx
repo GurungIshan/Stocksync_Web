@@ -50,7 +50,7 @@ export default function UserSales() {
                 getUserSalesSummaries()
             ]);
             
-            const userSales = fetchedSales.filter(sale => sale.userId.toString() === currentUserId);
+            const userSales = fetchedSales.filter(sale => sale.userId && sale.userId.toString() === currentUserId);
             setSales(userSales);
 
             const userSummary = fetchedSummaries.find(s => s.userId === currentUserId);
