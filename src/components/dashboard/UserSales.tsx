@@ -147,10 +147,6 @@ export default function UserSales() {
             </div>
         ) : null}
 
-        <div className='border-t pt-4'>
-            <h3 className="text-lg font-semibold pl-4">Recent Activity</h3>
-            <p className="text-sm text-muted-foreground pl-4">Your sales activity over the last 7 active days.</p>
-        </div>
         {chartData.length > 0 ? (
             <ChartContainer config={chartConfig} className="h-[350px] w-full">
                 <BarChart accessibilityLayer data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>

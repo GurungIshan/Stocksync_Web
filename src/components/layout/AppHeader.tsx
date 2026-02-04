@@ -21,19 +21,15 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
   DropdownMenuPortal,
-  DropdownMenuGroup,
 } from '@/components/ui/dropdown-menu';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import {
-  Bell,
   Home,
   LogOut,
   User,
   Moon,
   Sun,
   Laptop,
-  AlertTriangle,
-  FileText
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -95,62 +91,6 @@ const UserMenu = () => {
     )
 }
 
-const NotificationMenu = () => {
-    const notificationCount = 12; // Demo count
-
-    return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon" className="relative">
-                    <Bell className="h-5 w-5" />
-                    {notificationCount > 0 && (
-                         <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
-                            {notificationCount > 9 ? '9+' : notificationCount}
-                        </span>
-                    )}
-                    <span className="sr-only">Toggle notifications</span>
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80">
-                <DropdownMenuLabel className="font-bold">Notifications</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup className='max-h-80 overflow-y-auto'>
-                    <DropdownMenuItem className="flex items-start gap-3 hover:bg-muted/50">
-                        <AlertTriangle className="h-5 w-5 mt-1 text-yellow-500" />
-                        <div className="grid gap-1">
-                            <p className="font-semibold">Low Stock Alert</p>
-                            <p className="text-sm text-muted-foreground">
-                                3 items are running low on stock. Please check reorder alerts.
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                                15 minutes ago
-                            </p>
-                        </div>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="flex items-start gap-3 hover:bg-muted/50">
-                        <FileText className="h-5 w-5 mt-1 text-blue-500" />
-                        <div className="grid gap-1">
-                            <p className="font-semibold">New Monthly Report</p>
-                            <p className="text-sm text-muted-foreground">
-                                Your monthly sales report for June is ready for download.
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                                2 hours ago
-                            </p>
-                        </div>
-                    </DropdownMenuItem>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="justify-center">
-                    <Button variant="ghost" size="sm">Mark all as read</Button>
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
-    )
-}
-
-
 const AppBreadcrumb = () => {
   const pathname = usePathname();
   const segments = useMemo(() => pathname.split('/').filter(Boolean), [pathname]);
@@ -209,7 +149,6 @@ export default function AppHeader() {
       <SidebarTrigger className="sm:hidden" />
       <AppBreadcrumb />
       <div className="ml-auto flex items-center gap-2">
-        <NotificationMenu />
         <UserMenu />
       </div>
     </header>
