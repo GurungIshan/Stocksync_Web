@@ -111,7 +111,7 @@ export default function UserSales() {
     <Card className="transition-all duration-300 hover:shadow-accent/20 hover:shadow-lg hover:-translate-y-1">
       <CardHeader>
         <CardTitle>Your Sales Performance</CardTitle>
-        <CardDescription>A summary of your sales activity and recent trends.</CardDescription>
+        <CardDescription>A summary of your sales activity.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6 pl-2">
         {summary ? (
@@ -147,7 +147,7 @@ export default function UserSales() {
             </div>
         ) : null}
 
-        {chartData.length > 0 ? (
+        {chartData.length > 0 && (
             <ChartContainer config={chartConfig} className="h-[350px] w-full">
                 <BarChart accessibilityLayer data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                     <defs>
@@ -184,11 +184,6 @@ export default function UserSales() {
                     <Bar dataKey="sales" fill="url(#salesGradient)" radius={[4, 4, 0, 0]} />
                 </BarChart>
             </ChartContainer>
-        ) : (
-             <div className="flex h-[250px] w-full flex-col items-center justify-center gap-2">
-                <h3 className="text-lg font-semibold">No Sales Data</h3>
-                <p className="text-sm text-muted-foreground">You have not made any sales recently.</p>
-            </div>
         )}
       </CardContent>
     </Card>
