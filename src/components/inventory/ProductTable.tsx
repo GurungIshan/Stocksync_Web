@@ -21,10 +21,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getProducts } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
-type ProductTableProps = {
-    selectedCategory: string | null;
-}
-
 const ProductRowSkeleton = () => (
     <TableRow>
         <TableCell><Skeleton className="h-4 w-40" /></TableCell>
@@ -36,7 +32,7 @@ const ProductRowSkeleton = () => (
     </TableRow>
 );
 
-export default function ProductTable({ selectedCategory }: ProductTableProps) {
+export default function ProductTable() {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -44,7 +40,7 @@ export default function ProductTable({ selectedCategory }: ProductTableProps) {
         async function fetchProducts() {
             setLoading(true);
             try {
-                const data = await getProducts(selectedCategory);
+                const data = await getProducts();
                 setProducts(data);
             } catch (error) {
                 console.error('Failed to fetch products:', error);
@@ -54,7 +50,7 @@ export default function ProductTable({ selectedCategory }: ProductTableProps) {
             }
         }
         fetchProducts();
-    }, [selectedCategory]);
+    }, []);
 
     const formatCurrency = (value: number) =>
         new Intl.NumberFormat('en-IN', {
@@ -127,7 +123,7 @@ export default function ProductTable({ selectedCategory }: ProductTableProps) {
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={6} className="h-24 text-center">
-                                    No products found for the selected category.
+                                    No products found.
                                 </TableCell>
                             </TableRow>
                         )}
