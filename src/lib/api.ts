@@ -1,5 +1,5 @@
 
-import type { Product, Sale, Alert, CategoryDropdownItem, ProductDropdownItem, Stats } from './types';
+import type { Product, Sale, Alert, CategoryDropdownItem, ProductDropdownItem, Stats, UserSalesSummary } from './types';
 import { getToken } from './auth';
 
 // Simulate API delay
@@ -159,4 +159,21 @@ export async function getDashboardStats(): Promise<Stats> {
         console.error('Failed to fetch dashboard stats:', error);
         return { lowStockItems: 0 };
     }
+}
+
+export async function getUserSalesSummaries(): Promise<UserSalesSummary[]> {
+  const token = getToken();
+  if (!token) return [];
+  try {
+    const res = await fetch('https://localhost:7232/api/Sales/user-sales-summary', {
+      headers: { 'Authorization': `Bearer ${token}` },
+      cache: 'no-store',
+    });
+    if (!res.ok) throw new Error('Failed to fetch user sales summaries');
+    const data = await res.json();
+    return data || [];
+  } catch (error) {
+    console.error('Failed to fetch user sales summaries:', error);
+    return [];
+  }
 }

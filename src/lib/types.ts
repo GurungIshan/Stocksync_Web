@@ -94,3 +94,11 @@ export type DetailedSale = {
 export type Stats = {
   lowStockItems: number;
 };
+
+export type UserSalesSummary = {
+  userId: string;
+  userName: string;
+  saleCount: number;
+  totalAmount: number;
+  percentage: number;
+};
