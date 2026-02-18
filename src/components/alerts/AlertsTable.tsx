@@ -44,11 +44,8 @@ export default function AlertsTable({ alerts }: AlertsTableProps) {
                     <TableHeader>
                         <TableRow>
                             <TableHead>Product</TableHead>
-                            <TableHead>Urgency</TableHead>
+                            <TableHead className="text-center">Urgency</TableHead>
                             <TableHead className="text-center">Current Stock</TableHead>
-                            <TableHead className="text-center">Reorder Point</TableHead>
-                            <TableHead className="text-center">Lead Time (Days)</TableHead>
-                            <TableHead className="text-right text-accent font-medium">Suggested Qty</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -56,7 +53,7 @@ export default function AlertsTable({ alerts }: AlertsTableProps) {
                             alerts.map((alert) => (
                                 <TableRow key={alert.productId} className={getUrgencyRowClass(alert.urgencyLevel)}>
                                     <TableCell className="font-medium">{alert.productName}</TableCell>
-                                    <TableCell>
+                                    <TableCell className="text-center">
                                         <Badge 
                                             variant={getUrgencyBadgeVariant(alert.urgencyLevel)} 
                                             className={getUrgencyBadgeClass(alert.urgencyLevel)}
@@ -65,14 +62,11 @@ export default function AlertsTable({ alerts }: AlertsTableProps) {
                                         </Badge>
                                     </TableCell>
                                     <TableCell className="text-center font-bold text-destructive">{alert.currentStock}</TableCell>
-                                    <TableCell className="text-center">{alert.reorderPoint}</TableCell>
-                                    <TableCell className="text-center">{alert.leadTimeDays}</TableCell>
-                                    <TableCell className="text-right font-bold text-accent">{alert.suggestedOrderQty}</TableCell>
                                 </TableRow>
                             ))
                         ) : (
                              <TableRow>
-                                <TableCell colSpan={6} className="h-24 text-center">
+                                <TableCell colSpan={3} className="h-24 text-center">
                                     No low stock alerts. Good job!
                                 </TableCell>
                             </TableRow>
