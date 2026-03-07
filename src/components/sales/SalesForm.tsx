@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -130,7 +131,6 @@ export default function SalesForm() {
     data.items.forEach((item, index) => {
       const product = products.find(p => p.id === item.productId);
       const usedStock = getUsedStock(item.productId, index);
-      // If product doesn't exist, available stock is 0
       const availableStock = product ? product.stockQuantity - usedStock : 0;
       
       if (!product) {
@@ -183,7 +183,7 @@ export default function SalesForm() {
       
         discount: Number(data.discount) || 0,
       
-        tax: Number(data.tax) || 0, // percentage
+        tax: Number(data.tax) || 0,
       
         paymentMethod: data.paymentMethod.toUpperCase(),
       
@@ -194,7 +194,7 @@ export default function SalesForm() {
     const token = getToken();
 
     try {
-        const response = await fetch('https://localhost:7232/api/Sales', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/Sales`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -250,14 +250,6 @@ export default function SalesForm() {
     }
   }
 
-  if (isProductsLoading) {
-    return (
-        <div className="flex justify-center items-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-    )
-  }
-
   const getUsedStock = (productId: number, currentIndex: number) => {
     return watchedItems.reduce((acc, item, index) => {
       if (item.productId === productId && index !== currentIndex) {
@@ -266,6 +258,14 @@ export default function SalesForm() {
       return acc;
     }, 0);
   };
+
+  if (isProductsLoading) {
+    return (
+        <div className="flex justify-center items-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+    )
+  }
 
   return (
     <>

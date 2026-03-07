@@ -2,14 +2,13 @@
 import type { Product, Sale, Alert, CategoryDropdownItem, ProductDropdownItem, Stats, UserSalesSummary } from './types';
 import { getToken } from './auth';
 
-// Simulate API delay
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export async function getProducts(categoryId?: string | null): Promise<Product[]> {
   const token = getToken();
   if (!token) return [];
 
-  let url = 'https://localhost:7232/api/Product';
+  let url = `${BASE_URL}/api/Product`;
 
   if (categoryId) {
     url += `?categoryId=${Number(categoryId)}`;
@@ -40,7 +39,7 @@ export async function getProductsForDropdown(): Promise<ProductDropdownItem[]> {
     return [];
   }
   try {
-     const response = await fetch('https://localhost:7232/api/Product/Productdropdown', {
+     const response = await fetch(`${BASE_URL}/api/Product/Productdropdown`, {
         method: 'GET',
         headers: {
             'accept': '*/*',
@@ -60,7 +59,6 @@ export async function getProductsForDropdown(): Promise<ProductDropdownItem[]> {
 }
 
 export async function getProductById(id: string): Promise<any | undefined> {
-  // This needs to be adapted to your API or mocked data structure
    const products = await getProducts();
    return products.find(p => p.id.toString() === id);
 }
@@ -72,7 +70,7 @@ export async function getCategories(): Promise<CategoryDropdownItem[]> {
     return [];
   }
   try {
-     const response = await fetch('https://localhost:7232/api/Category/Categorydropdown', {
+     const response = await fetch(`${BASE_URL}/api/Category/Categorydropdown`, {
         method: 'GET',
         headers: {
             'accept': '*/*',
@@ -95,7 +93,7 @@ export async function getSales(): Promise<Sale[]> {
   const token = getToken();
   if (!token) return [];
   try {
-    const res = await fetch('https://localhost:7232/api/Sales', {
+    const res = await fetch(`${BASE_URL}/api/Sales`, {
       headers: { 'Authorization': `Bearer ${token}` },
       cache: 'no-store',
     });
@@ -112,7 +110,6 @@ export async function getSales(): Promise<Sale[]> {
         console.warn("Expected an array of sales, but received:", data);
     }
     
-    // Assuming the API returns dates as strings and we want to sort by date
     return salesList.sort((a: Sale, b: Sale) => {
         if (!a.saleDate || !b.saleDate) return 0;
         return new Date(b.saleDate).getTime() - new Date(a.saleDate).getTime()
@@ -127,7 +124,7 @@ export async function getReorderAlerts(): Promise<Alert[]> {
     const token = getToken();
     if (!token) return [];
     try {
-        const res = await fetch('https://localhost:7232/api/Sales/reorder-alerts', {
+        const res = await fetch(`${BASE_URL}/api/Sales/reorder-alerts`, {
             headers: { 'Authorization': `Bearer ${token}` },
             cache: 'no-store',
         });
@@ -144,7 +141,7 @@ export async function getDashboardStats(): Promise<Stats> {
     const token = getToken();
     if (!token) return { lowStockItems: 0 };
      try {
-        const alertsRes = await fetch('https://localhost:7232/api/Sales/reorder-alerts', {
+        const alertsRes = await fetch(`${BASE_URL}/api/Sales/reorder-alerts`, {
             headers: { 'Authorization': `Bearer ${token}` },
             cache: 'no-store',
         });
@@ -165,7 +162,7 @@ export async function getUserSalesSummaries(): Promise<UserSalesSummary[]> {
   const token = getToken();
   if (!token) return [];
   try {
-    const res = await fetch('https://localhost:7232/api/Sales/user-sales-summary', {
+    const res = await fetch(`${BASE_URL}/api/Sales/user-sales-summary`, {
       headers: { 'Authorization': `Bearer ${token}` },
       cache: 'no-store',
     });
