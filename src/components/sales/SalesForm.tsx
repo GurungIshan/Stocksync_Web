@@ -21,8 +21,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
-import { PlusCircle, Trash2, Loader2, AlertTriangle, Search } from 'lucide-react';
+import { PlusCircle, Trash2, Loader2, AlertTriangle, UserPlus } from 'lucide-react';
 import type { Product, ProductDropdownItem, DetailedSale, SaleItemDetail } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '../ui/separator';
@@ -52,11 +61,22 @@ const salesFormSchema = z.object({
 
 type SalesFormValues = z.infer<typeof salesFormSchema>;
 
+const addCustomerSchema = z.object({
+  customerName: z.string().min(2, "Name is required"),
+  phoneNumber: z.string().min(10, "Valid phone number is required"),
+  email: z.string().email("Invalid email").optional().or(z.literal('')),
+  address: z.string().optional(),
+});
+
+type AddCustomerValues = z.infer<typeof addCustomerSchema>;
+
 export default function SalesForm() {
   const { toast } = useToast();
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isSearchingCustomer, setIsSearchingCustomer] = useState(false);
+  const [isAddingCustomer, setIsAddingCustomer] = useState(false);
+  const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [productDropdown, setProductDropdown] = useState<ProductDropdownItem[]>([]);
   const [isProductsLoading, setIsProductsLoading] = useState(true);
@@ -74,6 +94,16 @@ export default function SalesForm() {
       discount: 0,
       tax: 0,
     },
+  });
+
+  const addCustomerForm = useForm<AddCustomerValues>({
+    resolver: zodResolver(addCustomerSchema),
+    defaultValues: {
+      customerName: '',
+      phoneNumber: '',
+      email: '',
+      address: '',
+    }
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -161,6 +191,50 @@ export default function SalesForm() {
     setCompletedSale(null);
     form.reset();
   };
+
+  async function onAddCustomerSubmit(values: AddCustomerValues) {
+    setIsAddingCustomer(true);
+    const token = getToken();
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/Customers`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(values),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Customer Added",
+          description: "New customer has been successfully registered.",
+        });
+        setIsAddCustomerOpen(false);
+        // Fill the main form with the new customer data
+        form.setValue('customerPhoneNumber', values.phoneNumber);
+        form.setValue('customerName', values.customerName);
+        form.setValue('email', values.email || '');
+        form.setValue('address', values.address || '');
+        addCustomerForm.reset();
+      } else {
+        const errorData = await response.json();
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: errorData.message || "Failed to add customer.",
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Network Error",
+        description: "Could not connect to the server.",
+      });
+    } finally {
+      setIsAddingCustomer(false);
+    }
+  }
 
   async function onSubmit(data: SalesFormValues) {
     setIsLoading(true);
@@ -315,9 +389,88 @@ export default function SalesForm() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           <div className="lg:col-span-2 space-y-8">
               <Card>
-                  <CardHeader>
-                      <CardTitle>Customer Details</CardTitle>
-                      <CardDescription>Enter customer information for this sale.</CardDescription>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                      <div>
+                        <CardTitle>Customer Details</CardTitle>
+                        <CardDescription>Enter customer information for this sale.</CardDescription>
+                      </div>
+                      <Dialog open={isAddCustomerOpen} onOpenChange={setIsAddCustomerOpen}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <UserPlus className="mr-2 h-4 w-4" />
+                            Add Customer
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                          <DialogHeader>
+                            <DialogTitle>Add New Customer</DialogTitle>
+                            <DialogDescription>
+                              Register a new customer in the system.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <Form {...addCustomerForm}>
+                            <form onSubmit={addCustomerForm.handleSubmit(onAddCustomerSubmit)} className="space-y-4 py-4">
+                              <FormField
+                                control={addCustomerForm.control}
+                                name="customerName"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Full Name</FormLabel>
+                                    <FormControl>
+                                      <Input placeholder="John Doe" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={addCustomerForm.control}
+                                name="phoneNumber"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Phone Number</FormLabel>
+                                    <FormControl>
+                                      <Input placeholder="98XXXXXXXX" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={addCustomerForm.control}
+                                name="email"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Email</FormLabel>
+                                    <FormControl>
+                                      <Input type="email" placeholder="john@example.com" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={addCustomerForm.control}
+                                name="address"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Address</FormLabel>
+                                    <FormControl>
+                                      <Input placeholder="Kathmandu, Nepal" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <DialogFooter>
+                                <Button type="submit" disabled={isAddingCustomer}>
+                                  {isAddingCustomer ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Customer"}
+                                </Button>
+                              </DialogFooter>
+                            </form>
+                          </Form>
+                        </DialogContent>
+                      </Dialog>
                   </CardHeader>
                   <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <FormField
