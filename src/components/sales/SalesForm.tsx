@@ -295,6 +295,7 @@ export default function SalesForm() {
         newCustomer: data.customerName?.trim()
           ? {
               customerName: data.customerName.trim(),
+              phoneNumber: data.customerPhoneNumber?.trim() || null,
               email: data.email?.trim() || null,
               address: data.address?.trim() || null,
             }
