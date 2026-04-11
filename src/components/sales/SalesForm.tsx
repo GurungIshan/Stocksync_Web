@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -129,7 +130,6 @@ export default function SalesForm() {
 
         if (response.ok) {
           const customer = await response.json();
-          // Correctly map API response to form fields
           form.setValue('customerName', customer.customerName || customer.CustomerName || '');
           form.setValue('email', customer.email || customer.Email || customer.customerEmail || '');
           form.setValue('address', customer.address || customer.Address || customer.customerAddress || '');
@@ -200,8 +200,8 @@ export default function SalesForm() {
       const payload = {
         customerName: values.customerName,
         phoneNumber: values.phoneNumber,
-        email: values.email || null,
-        address: values.address || null,
+        email: values.email?.trim() || null,
+        address: values.address?.trim() || null,
         isActive: true,
         createdAt: new Date().toISOString(),
       };
@@ -210,7 +210,8 @@ export default function SalesForm() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
         },
         body: JSON.stringify(payload),
       });
@@ -221,25 +222,24 @@ export default function SalesForm() {
           description: "New customer has been successfully registered.",
         });
         setIsAddCustomerOpen(false);
-        // Fill the main form with the new customer data
         form.setValue('customerPhoneNumber', values.phoneNumber);
         form.setValue('customerName', values.customerName);
         form.setValue('email', values.email || '');
         form.setValue('address', values.address || '');
         addCustomerForm.reset();
       } else {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({ message: "Failed to create customer." }));
         toast({
           variant: "destructive",
           title: "Error",
-          description: errorData.message || "Failed to add customer.",
+          description: errorData.message || "Failed to add customer. Please check your data.",
         });
       }
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Network Error",
-        description: "Could not connect to the server.",
+        description: "Could not connect to the server. Please ensure the backend is running.",
       });
     } finally {
       setIsAddingCustomer(false);
@@ -292,7 +292,6 @@ export default function SalesForm() {
 
     const payload = {
         customerPhoneNumber: data.customerPhoneNumber?.trim() || null,
-      
         newCustomer: data.customerName?.trim()
           ? {
               customerName: data.customerName.trim(),
@@ -300,18 +299,13 @@ export default function SalesForm() {
               address: data.address?.trim() || null,
             }
           : null,
-      
         items: data.items.map(item => ({
           productId: Number(item.productId),
           quantity: Number(item.quantity),
         })),
-      
         discount: currentDiscountAmount,
-      
         tax: Number(data.tax) || 0,
-      
         paymentMethod: data.paymentMethod.toUpperCase(),
-      
         userId,
       };
       
@@ -406,7 +400,7 @@ export default function SalesForm() {
                       </div>
                       <Dialog open={isAddCustomerOpen} onOpenChange={setIsAddCustomerOpen}>
                         <DialogTrigger asChild>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" type="button">
                             <UserPlus className="mr-2 h-4 w-4" />
                             Add Customer
                           </Button>
