@@ -196,13 +196,22 @@ export default function SalesForm() {
     setIsAddingCustomer(true);
     const token = getToken();
     try {
+      const payload = {
+        customerName: values.customerName,
+        phoneNumber: values.phoneNumber,
+        email: values.email || null,
+        address: values.address || null,
+        isActive: true,
+        createdAt: new Date().toISOString(),
+      };
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/Customers`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
