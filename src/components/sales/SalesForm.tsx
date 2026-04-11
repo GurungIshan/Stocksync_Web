@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -47,7 +46,7 @@ const salesFormSchema = z.object({
       })
     )
     .min(1, 'At least one item is required.'),
-    discount: z.coerce.number().min(0, "Discount can't be negative.").optional(),
+    discount: z.coerce.number().min(0, "Discount can't be negative.").max(100, "Discount can't exceed 100%.").optional(),
     tax: z.coerce.number().min(0, "Tax can't be negative.").optional(),
 });
 
@@ -108,7 +107,7 @@ export default function SalesForm() {
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'NPR', minimumFractionDigits: 0 }).format(value);
 
   const watchedItems = form.watch('items');
-  const watchedDiscount = form.watch('discount') || 0;
+  const watchedDiscountPercent = form.watch('discount') || 0;
   const watchedTax = form.watch('tax') || 0;
 
   const subTotal = watchedItems.reduce((acc, item) => {
@@ -116,8 +115,9 @@ export default function SalesForm() {
     return acc + (product ? product.pricePerUnit * (item.quantity || 0) : 0);
   }, 0);
   
-  const taxAmount = (subTotal - watchedDiscount) * (watchedTax / 100);
-  const total = subTotal - watchedDiscount + taxAmount;
+  const discountAmount = (subTotal * watchedDiscountPercent) / 100;
+  const taxAmount = (subTotal - discountAmount) * (watchedTax / 100);
+  const total = subTotal - discountAmount + taxAmount;
   
   const handleCloseBill = () => {
     setCompletedSale(null);
@@ -165,6 +165,9 @@ export default function SalesForm() {
       return;
     }
 
+    const currentSubTotal = subTotal;
+    const currentDiscountAmount = (currentSubTotal * (data.discount || 0)) / 100;
+
     const payload = {
         customerPhoneNumber: data.customerPhoneNumber?.trim() || null,
       
@@ -181,7 +184,7 @@ export default function SalesForm() {
           quantity: Number(item.quantity),
         })),
       
-        discount: Number(data.discount) || 0,
+        discount: currentDiscountAmount,
       
         tax: Number(data.tax) || 0,
       
@@ -215,6 +218,7 @@ export default function SalesForm() {
                 };
             });
              const subTotalForBill = saleItemsForBill.reduce((acc, item) => acc + item.totalPrice, 0);
+             const discountAmountForBill = (subTotalForBill * (data.discount || 0)) / 100;
 
             setCompletedSale({
                 ...saleData,
@@ -227,7 +231,7 @@ export default function SalesForm() {
                 },
                 saleItems: saleItemsForBill,
                 subTotal: subTotalForBill,
-                discount: data.discount || 0,
+                discount: discountAmountForBill,
                 tax: data.tax || 0,
                 paymentMethod: data.paymentMethod
             });
@@ -451,7 +455,7 @@ export default function SalesForm() {
                               <span>{formatCurrency(subTotal)}</span>
                           </div>
                           <div className="flex justify-between items-center">
-                            <FormLabel htmlFor='discount-input'>Discount</FormLabel>
+                            <FormLabel htmlFor='discount-input'>Discount (%)</FormLabel>
                               <FormField
                                   control={form.control}
                                   name="discount"
@@ -464,6 +468,10 @@ export default function SalesForm() {
                                       </FormItem>
                                   )}
                               />
+                          </div>
+                          <div className="flex justify-between text-sm text-muted-foreground">
+                              <span>Discount Amount</span>
+                              <span>- {formatCurrency(discountAmount)}</span>
                           </div>
                           <div className="flex justify-between items-center">
                               <FormLabel htmlFor='tax-input'>Tax (%)</FormLabel>
@@ -479,6 +487,10 @@ export default function SalesForm() {
                                       </FormItem>
                                   )}
                               />
+                          </div>
+                          <div className="flex justify-between text-sm text-muted-foreground">
+                              <span>Tax Amount</span>
+                              <span>+ {formatCurrency(taxAmount)}</span>
                           </div>
                       </div>
                       <Separator />
