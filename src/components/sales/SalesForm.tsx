@@ -129,13 +129,14 @@ export default function SalesForm() {
 
         if (response.ok) {
           const customer = await response.json();
-          form.setValue('customerName', customer.customerName || '');
-          form.setValue('email', customer.email || '');
-          form.setValue('address', customer.address || '');
+          // Correctly map API response to form fields
+          form.setValue('customerName', customer.customerName || customer.CustomerName || '');
+          form.setValue('email', customer.email || customer.Email || customer.customerEmail || '');
+          form.setValue('address', customer.address || customer.Address || customer.customerAddress || '');
           
           toast({
             title: 'Customer Found',
-            description: `Details for ${customer.customerName} loaded automatically.`,
+            description: `Details for ${customer.customerName || 'customer'} loaded automatically.`,
           });
         }
       } catch (error) {
