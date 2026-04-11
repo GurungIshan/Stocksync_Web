@@ -285,12 +285,12 @@ export default function SalesForm() {
                   <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <FormField
                           control={form.control}
-                          name="customerName"
+                          name="customerPhoneNumber"
                           render={({ field }) => (
                           <FormItem>
-                              <FormLabel>Customer Name</FormLabel>
+                              <FormLabel>Customer Phone</FormLabel>
                               <FormControl>
-                              <Input placeholder="Enter customer name" {...field} />
+                              <Input type="tel" placeholder="Enter phone number" {...field} />
                               </FormControl>
                               <FormMessage />
                           </FormItem>
@@ -298,12 +298,12 @@ export default function SalesForm() {
                       />
                       <FormField
                           control={form.control}
-                          name="customerPhoneNumber"
+                          name="customerName"
                           render={({ field }) => (
                           <FormItem>
-                              <FormLabel>Customer Phone</FormLabel>
+                              <FormLabel>Customer Name</FormLabel>
                               <FormControl>
-                              <Input type="tel" placeholder="Enter phone number" {...field} />
+                              <Input placeholder="Enter customer name" {...field} />
                               </FormControl>
                               <FormMessage />
                           </FormItem>
