@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
-import { PlusCircle, Trash2, Loader2, AlertTriangle } from 'lucide-react';
+import { PlusCircle, Trash2, Loader2, AlertTriangle, Search } from 'lucide-react';
 import type { Product, ProductDropdownItem, DetailedSale, SaleItemDetail } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '../ui/separator';
@@ -56,10 +56,68 @@ export default function SalesForm() {
   const { toast } = useToast();
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [isSearchingCustomer, setIsSearchingCustomer] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [productDropdown, setProductDropdown] = useState<ProductDropdownItem[]>([]);
   const [isProductsLoading, setIsProductsLoading] = useState(true);
   const [completedSale, setCompletedSale] = useState<DetailedSale | null>(null);
+
+  const form = useForm<SalesFormValues>({
+    resolver: zodResolver(salesFormSchema),
+    defaultValues: {
+      customerPhoneNumber: '',
+      customerName: '',
+      email: '',
+      address: '',
+      items: [{ productId: 0, quantity: 1 }],
+      paymentMethod: 'Cash',
+      discount: 0,
+      tax: 0,
+    },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: 'items',
+  });
+
+  // Customer lookup logic
+  const watchedPhone = form.watch('customerPhoneNumber');
+  
+  useEffect(() => {
+    const fetchCustomer = async () => {
+      if (!watchedPhone || watchedPhone.length < 10) return;
+
+      setIsSearchingCustomer(true);
+      const token = getToken();
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/Customers/by-phone/${watchedPhone}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const customer = await response.json();
+          form.setValue('customerName', customer.customerName || '');
+          form.setValue('email', customer.email || '');
+          form.setValue('address', customer.address || '');
+          
+          toast({
+            title: 'Customer Found',
+            description: `Details for ${customer.customerName} loaded automatically.`,
+          });
+        }
+      } catch (error) {
+        console.error('Customer lookup error:', error);
+      } finally {
+        setIsSearchingCustomer(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(fetchCustomer, 600);
+    return () => clearTimeout(debounceTimer);
+  }, [watchedPhone, form, toast]);
 
   useEffect(() => {
     async function fetchProductsForSale() {
@@ -83,26 +141,6 @@ export default function SalesForm() {
     fetchProductsForSale();
   }, [toast]);
 
-
-  const form = useForm<SalesFormValues>({
-    resolver: zodResolver(salesFormSchema),
-    defaultValues: {
-      customerPhoneNumber: '',
-      customerName: '',
-      email: '',
-      address: '',
-      items: [{ productId: 0, quantity: 1 }],
-      paymentMethod: 'Cash',
-      discount: 0,
-      tax: 0,
-    },
-  });
-
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: 'items',
-  });
-  
   const formatCurrency = (value: number) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'NPR', minimumFractionDigits: 0 }).format(value);
 
@@ -192,7 +230,6 @@ export default function SalesForm() {
       
         userId,
       };
-      
       
     const token = getToken();
 
@@ -289,9 +326,16 @@ export default function SalesForm() {
                           render={({ field }) => (
                           <FormItem>
                               <FormLabel>Customer Phone</FormLabel>
-                              <FormControl>
-                              <Input type="tel" placeholder="Enter phone number" {...field} />
-                              </FormControl>
+                              <div className="relative">
+                                <FormControl>
+                                  <Input type="tel" placeholder="Enter phone number" {...field} />
+                                </FormControl>
+                                {isSearchingCustomer && (
+                                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                                  </div>
+                                )}
+                              </div>
                               <FormMessage />
                           </FormItem>
                           )}
