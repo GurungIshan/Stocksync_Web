@@ -85,6 +85,7 @@ export default function SalesForm() {
 
   const form = useForm<SalesFormValues>({
     resolver: zodResolver(salesFormSchema),
+    mode: 'onChange',
     defaultValues: {
       customerPhoneNumber: '',
       customerName: '',
