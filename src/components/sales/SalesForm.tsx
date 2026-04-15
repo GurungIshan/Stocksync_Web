@@ -93,7 +93,7 @@ export default function SalesForm() {
       items: [{ productId: 0, quantity: 1 }],
       paymentMethod: 'Cash',
       discount: 0,
-      tax: 0,
+      tax: 13,
     },
   });
 
@@ -121,8 +121,10 @@ export default function SalesForm() {
 
       setIsSearchingCustomer(true);
       const token = getToken();
+      const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+      
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/Customers/by-phone/${watchedPhone}`, {
+        const response = await fetch(`${baseUrl}/api/Customers/by-phone/${watchedPhone}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -190,12 +192,23 @@ export default function SalesForm() {
   
   const handleCloseBill = () => {
     setCompletedSale(null);
-    form.reset();
+    form.reset({
+      ...form.getValues(),
+      items: [{ productId: 0, quantity: 1 }],
+      customerPhoneNumber: '',
+      customerName: '',
+      email: '',
+      address: '',
+      discount: 0,
+      tax: 13,
+    });
   };
 
   async function onAddCustomerSubmit(values: AddCustomerValues) {
     setIsAddingCustomer(true);
     const token = getToken();
+    const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+    
     try {
       const payload = {
         customerName: values.customerName,
@@ -206,7 +219,7 @@ export default function SalesForm() {
         createdAt: new Date().toISOString(),
       };
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/Customers`, {
+      const response = await fetch(`${baseUrl}/api/Customers`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -311,9 +324,10 @@ export default function SalesForm() {
       };
       
     const token = getToken();
+    const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/Sales`, {
+        const response = await fetch(`${baseUrl}/api/Sales`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -691,7 +705,7 @@ export default function SalesForm() {
                                   render={({ field }) => (
                                       <FormItem className="w-24">
                                       <FormControl>
-                                          <Input id="tax-input" type="number" placeholder="0" className="text-right" {...field} />
+                                          <Input id="tax-input" type="number" placeholder="0" className="text-right" {...field} disabled />
                                       </FormControl>
                                       <FormMessage />
                                       </FormItem>
