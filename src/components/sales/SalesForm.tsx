@@ -56,7 +56,7 @@ const salesFormSchema = z.object({
       })
     )
     .min(1, 'At least one item is required.'),
-    discount: z.coerce.number().min(0, "Discount can't be negative.").max(100, "Discount can't exceed 100%.").optional(),
+    discount: z.coerce.number().min(0, "Discount can't be negative.").max(10, "Discount can't exceed 10%.").optional(),
     tax: z.coerce.number().min(0, "Tax can't be negative.").optional(),
 });
 
@@ -664,7 +664,15 @@ export default function SalesForm() {
                                   render={({ field }) => (
                                       <FormItem className="w-24">
                                       <FormControl>
-                                          <Input id="discount-input" type="number" placeholder="0" className="text-right" {...field} />
+                                          <Input 
+                                            id="discount-input" 
+                                            type="number" 
+                                            placeholder="0" 
+                                            className="text-right" 
+                                            min="0"
+                                            max="10"
+                                            {...field} 
+                                          />
                                       </FormControl>
                                       <FormMessage />
                                       </FormItem>
